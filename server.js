@@ -2,7 +2,6 @@
 // ADS ENGINE PRO V8 - SERVIDOR PRINCIPAL
 // Francisco Blanco | franciscoblanco.es
 // ============================================================
-
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -11,11 +10,13 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 
+// FIX: Trust proxy para Railway (evita ERR_ERL_UNEXPECTED_X_FORWARDED_FOR)
+app.set('trust proxy', 1);
+
 // ============================================================
 // MIDDLEWARES GLOBALES
 // ============================================================
 app.use(express.json({ limit: '10mb' }));
-
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
