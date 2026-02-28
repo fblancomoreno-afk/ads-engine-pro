@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ads Engine Pro — Acceso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #0066ff;
+      --primary-dark: #0052cc;
+      --accent: #ff3366;
+      --success: #00d084;
+      --bg-main: #0a0f1e;
+      --bg-card: #111827;
+      --bg-input: #1a2332;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --border: #1e293b;
+      --border-light: #2d3748;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg-main);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Animated background */
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .bg-glow::before {
+      content: '';
+      position: absolute;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(0,102,255,0.12) 0%, transparent 70%);
+      top: -200px; right: -200px;
+      animation: drift 18s infinite ease-in-out;
+    }
+    .bg-glow::after {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(255,51,102,0.08) 0%, transparent 70%);
+      bottom: -150px; left: -150px;
+      animation: drift 14s infinite ease-in-out reverse;
+    }
+    @keyframes drift {
+      0%,100% { transform: translate(0,0); }
+      50% { transform: translate(30px,-25px); }
+    }
+
+    /* Grid background subtle */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 48px 48px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .login-wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 460px;
+      padding: 24px;
+      animation: fadeUp 0.5s ease-out;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Logo area */
+    .logo-area {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .logo-icon {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 40px rgba(0,102,255,0.3);
+    }
+
+    .logo-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-title span {
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      font-weight: 300;
+    }
+
+    /* Card */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 32px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .card-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 13px 16px;
+      color: var(--text-primary);
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0,102,255,0.15);
+    }
+
+    input::placeholder { color: #3d4f6a; }
+
+    .btn-login {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      margin-top: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-login:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(0,102,255,0.35);
+    }
+
+    .btn-login:active { transform: translateY(0); }
+
+    .btn-login:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Error message */
+    .error-msg {
+      display: none;
+      background: rgba(255,51,102,0.1);
+      border: 1px solid rgba(255,51,102,0.3);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #ff6688;
+      margin-bottom: 16px;
+    }
+
+    /* Loading spinner inside button */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Footer */
+    .footer-note {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 12px;
+      color: #3d4f6a;
+    }
+
+    .footer-note a {
+      color: var(--text-secondary);
+      text-decoration: none;
+    }
+    .footer-note a:hover { color: var(--text-primary); }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    .plan-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0,102,255,0.1);
+      border: 1px solid rgba(0,102,255,0.3);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <div class="login-wrapper">
+    <!-- Logo -->
+    <div class="logo-area">
+      <div class="logo-icon">🚀</div>
+      <div class="logo-title">Ads Engine <span>Pro</span></div>
+      <div class="logo-sub">Plataforma profesional de campañas Google Ads · por Francisco Blanco</div>
+    </div>
+
+    <!-- Card -->
+    <div class="card">
+      <div class="plan-badge">🔐 Acceso seguro</div>
+      <div class="card-title">Bienvenido de vuelta</div>
+      <div class="card-sub">Introduce tus credenciales para acceder al generador</div>
+
+      <div id="error-msg" class="error-msg">
+        ❌ Email o contraseña incorrectos. Inténtalo de nuevo.
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          placeholder="tu@email.com"
+          autocomplete="email"
+          autofocus
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input 
+          type="password" 
+          id="password" 
+          placeholder="••••••••"
+          autocomplete="current-password"
+        />
+      </div>
+
+      <button class="btn-login" id="btn-login" onclick="doLogin()">
+        Entrar al generador →
+      </button>
+
+      <hr class="divider">
+
+      <div style="font-size: 12px; color: var(--text-secondary); text-align: center; line-height: 1.7;">
+        ¿Problemas para acceder? Contacta con tu gestor o escribe a<br>
+        <a href="/cdn-cgi/l/email-protection#5137333d303f323e3c3e23343f3e11363c30383d7f323e3c" style="color: var(--primary);"><span class="__cf_email__" data-cfemail="4620242a272825292b293423282906212b272f2a6825292b">[email&#160;protected]</span></a>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      © 2025 Francisco Blanco · <a href="https://www.franciscoblanco.es" target="_blank">franciscoblanco.es</a>
+    </div>
+  </div>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    // URL del servidor — igual que en el motor V8
+    const SERVER_URL = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000'
+      : '';
+
+    // Permitir Enter en los campos
+    document.getElementById('email').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('password').focus();
+    });
+    document.getElementById('password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    // Si ya hay sesión, ir directo al motor
+    if (localStorage.getItem('ads_engine_token')) {
+      window.location.href = 'dashboard.html';
+    }
+
+    async function doLogin() {
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn      = document.getElementById('btn-login');
+      const errorDiv = document.getElementById('error-msg');
+
+      errorDiv.style.display = 'none';
+
+      // Validación básica
+      if (!email || !password) {
+        showError('Por favor completa email y contraseña.');
+        return;
+      }
+
+      // Estado de carga
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Verificando...';
+
+      try {
+        const response = await fetch(`${SERVER_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showError(data.error || 'Email o contraseña incorrectos.');
+          return;
+        }
+
+        // Guardar token y datos de usuario
+        localStorage.setItem('ads_engine_token', data.token);
+        localStorage.setItem('ads_engine_user', JSON.stringify({
+          id:    data.user.id,
+          email: data.user.email,
+          role:  data.user.role,
+          plan:  data.user.plan_type
+        }));
+
+        // Redirigir al motor
+        btn.innerHTML = '✅ Acceso concedido — Entrando...';
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 600);
+
+      } catch (err) {
+        showError('Error de conexión. Verifica que el servidor esté activo.');
+        console.error(err);
+      } finally {
+        if (btn.disabled) {
+          btn.disabled = false;
+          if (!btn.innerHTML.includes('Entrando')) {
+            btn.innerHTML = 'Entrar al generador →';
+          }
+        }
+      }
+    }
+
+    function showError(msg) {
+      const div = document.getElementById('error-msg');

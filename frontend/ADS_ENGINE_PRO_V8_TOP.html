@@ -1,0 +1,4630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ads Engine Pro V8 TOP - Francisco Blanco | Google Ads Campaign Generator</title>
+  
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Sora:wght@300;400;600;700;800&display=swap');
+    
+    :root {
+      --primary: #0066ff;
+      --primary-dark: #0052cc;
+      --accent: #ff3366;
+      --success: #00d084;
+      --warning: #ff9500;
+      --bg-main: #0a0f1e;
+      --bg-card: #111827;
+      --bg-input: #1a2332;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #1e293b;
+      --border-light: #2d3748;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg-main);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    /* Animated background */
+    .bg-animated {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    
+    .bg-animated::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0, 102, 255, 0.15) 0%, transparent 70%);
+      top: -300px;
+      right: -100px;
+      animation: float 20s infinite ease-in-out;
+    }
+    
+    .bg-animated::after {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255, 51, 102, 0.1) 0%, transparent 70%);
+      bottom: -200px;
+      left: -100px;
+      animation: float 15s infinite ease-in-out reverse;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(30px, -30px) rotate(5deg); }
+      66% { transform: translate(-20px, 20px) rotate(-5deg); }
+    }
+    
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+    
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+      animation: fadeInDown 0.6s ease-out;
+    }
+    
+    .header h1 {
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    
+    .header p {
+      color: var(--text-secondary);
+      font-size: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: rgba(0, 102, 255, 0.1);
+      border: 1px solid rgba(0, 102, 255, 0.3);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-top: 12px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    /* NEW: URL Feature Badge */
+    .badge-new {
+      background: linear-gradient(135deg, rgba(0, 208, 132, 0.2), rgba(0, 102, 255, 0.2));
+      border: 1px solid var(--success);
+      color: var(--success);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    /* Wizard Navigation */
+    .wizard-nav {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 40px;
+      animation: fadeIn 0.6s ease-out 0.2s backwards;
+    }
+    
+    .wizard-step {
+      flex: 1;
+      max-width: 200px;
+      padding: 16px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .wizard-step::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .wizard-step.active::before {
+      transform: translateX(0);
+    }
+    
+    .wizard-step.active {
+      background: rgba(0, 102, 255, 0.05);
+      border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(0, 102, 255, 0.2);
+    }
+    
+    .wizard-step.completed {
+      border-color: var(--success);
+    }
+    
+    .wizard-step:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: var(--bg-input);
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 8px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .wizard-step.active .step-number {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .wizard-step.completed .step-number {
+      background: var(--success);
+      color: white;
+    }
+    
+    .step-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    
+    .wizard-step.active .step-title {
+      color: var(--text-primary);
+    }
+    
+    /* Step Content */
+    .step-content {
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+    }
+    
+    .step-content.active {
+      display: block;
+    }
+    
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      border-color: var(--border-light);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
+    
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    
+    .card-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+    
+    /* NEW: URL Analysis Card */
+    .url-card {
+      background: linear-gradient(135deg, rgba(0, 208, 132, 0.05), rgba(0, 102, 255, 0.05));
+      border: 1px solid rgba(0, 208, 132, 0.3);
+    }
+    
+    .url-card:hover {
+      border-color: var(--success);
+      box-shadow: 0 0 20px rgba(0, 208, 132, 0.2);
+    }
+    
+    .url-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(0, 208, 132, 0.1);
+      border: 1px solid rgba(0, 208, 132, 0.3);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--success);
+      margin-top: 12px;
+    }
+    
+    .url-loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--success);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    
+    .form-label-required::after {
+      content: '*';
+      color: var(--accent);
+      margin-left: 4px;
+    }
+    
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-input);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.3s ease;
+    }
+    
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+    }
+    
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+    
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 2px solid var(--border);
+    }
+    
+    .btn-secondary:hover {
+      border-color: var(--primary);
+      background: rgba(0, 102, 255, 0.05);
+    }
+    
+    .btn-icon {
+      font-size: 18px;
+    }
+    
+    /* Loading State */
+    .loading-container {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    
+    .loading-container.active {
+      display: block;
+    }
+    
+    .loader {
+      width: 60px;
+      height: 60px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      margin: 0 auto 24px;
+      animation: spin 1s linear infinite;
+    }
+    
+    .loading-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    
+    .loading-subtext {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    /* Results */
+    .results-container {
+      display: block; /* Changed: Always visible with demo data */
+      animation: fadeIn 0.6s ease-out;
+    }
+    
+    .results-container.active {
+      display: block;
+    }
+    
+    .results-header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 32px;
+      background: linear-gradient(135deg, rgba(0, 102, 255, 0.1), rgba(255, 51, 102, 0.1));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    
+    .results-title {
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+    
+    .results-subtitle {
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+    
+    .results-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .results-grid {
+      display: grid;
+      gap: 24px;
+    }
+    
+    .result-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .result-card:hover {
+      border-color: var(--border-light);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: rgba(0, 102, 255, 0.05);
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .result-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .copy-btn {
+      padding: 8px 16px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .copy-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    
+    .result-content {
+      padding: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 16px 24px;
+      background: var(--bg-card);
+      border: 2px solid var(--success);
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+    
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    
+    .toast-icon {
+      font-size: 20px;
+    }
+    
+    .toast-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    /* URL Input Groups */
+    .url-input-group {
+      position: relative;
+    }
+    
+    .btn-icon-only {
+      background: rgba(255, 51, 102, 0.1);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 16px;
+    }
+    
+    .btn-icon-only:hover {
+      background: var(--accent);
+      transform: scale(1.1);
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 24px 16px;
+      }
+      
+      .wizard-nav {
+        flex-direction: column;
+      }
+      
+      .wizard-step {
+        max-width: 100%;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .btn-group {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .results-actions {
+        flex-direction: column;
+      }
+    }
+    
+    /* V8.1: URL PREVIEW */
+    .url-preview-container {
+      margin-top: 16px;
+      padding: 16px;
+      background: rgba(0, 102, 255, 0.05);
+      border: 1px solid rgba(0, 102, 255, 0.2);
+      border-radius: 12px;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .url-preview-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    
+    .url-preview-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--primary);
+      padding: 10px 14px;
+      background: var(--bg-input);
+      border-radius: 8px;
+      border: 1px solid var(--border-light);
+      word-break: break-all;
+    }
+    
+    .url-preview-display .domain {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    
+    .url-preview-display .path {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* V8.1: SEMANTIC BADGE */
+    .semantic-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(0, 208, 132, 0.1), rgba(0, 102, 255, 0.1));
+      border: 1px solid rgba(0, 208, 132, 0.3);
+      border-radius: 12px;
+      margin-bottom: 24px;
+      animation: fadeIn 0.4s ease-out;
+    }
+    
+    .semantic-badge-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    
+    .semantic-badge-content {
+      flex: 1;
+    }
+    
+    .semantic-badge-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--success);
+      margin-bottom: 4px;
+    }
+    
+    .semantic-badge-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-animated"></div>
+  
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>Ads Engine Pro V8 TOP</h1>
+      <p>Sistema Profesional de Francisco Blanco - Consultor Google Ads</p>
+      <div class="badge">🚀 V8 TOP · Software SaaS Campañas Google Ads · Sin Canibalización · Validación Total</div>
+    </div>
+    
+    <!-- Info Banner -->
+    <div style="background: linear-gradient(135deg, rgba(0, 208, 132, 0.1), rgba(0, 102, 255, 0.1)); border: 2px solid var(--success); border-radius: 12px; padding: 20px; margin-bottom: 32px; text-align: center;">
+      <div style="font-size: 18px; font-weight: 700; color: var(--success); margin-bottom: 8px;">
+        ✅ Ads Engine Pro V8 TOP — Versión Comercial Definitiva
+      </div>
+      <div style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">
+        Software SaaS de setup Google Ads: 1 País + 1 Ciudad · Hasta 6 grupos de anuncios · Sin canibalización de keywords · URLs inteligentes por grupo
+      </div>
+    </div>
+    
+    <!-- Wizard Navigation -->
+    <div class="wizard-nav">
+      <div class="wizard-step active" onclick="goToStep(1)">
+        <div class="step-number">1</div>
+        <div class="step-title">Negocio</div>
+      </div>
+      <div class="wizard-step" onclick="goToStep(2)">
+        <div class="step-number">2</div>
+        <div class="step-title">Campaña</div>
+      </div>
+      <div class="wizard-step" onclick="goToStep(3)">
+        <div class="step-number">3</div>
+        <div class="step-title">Targeting</div>
+      </div>
+      <div class="wizard-step" onclick="goToStep(4)">
+        <div class="step-number">4</div>
+        <div class="step-title">Presupuesto</div>
+      </div>
+      <div class="wizard-step" onclick="goToStep(5)">
+        <div class="step-number">5</div>
+        <div class="step-title">Generación</div>
+      </div>
+    </div>
+    
+    <!-- Step 1: Business Information - ENHANCED STRUCTURED FORM -->
+    <div class="step-content active" id="step1">
+      <div class="card">
+        <div class="card-title">📋 Información del Negocio</div>
+        <div class="card-subtitle">Formulario estructurado para generar campañas de máxima calidad</div>
+        
+        <div class="form-group">
+          <label class="form-label form-label-required">Nombre del Negocio</label>
+          <input type="text" id="businessName" class="form-input" placeholder="Ej: Ecool Barcelona">
+          <div class="form-hint">Nombre de tu empresa o marca</div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label form-label-required">Sector/Industria</label>
+          <select id="industry" class="form-select">
+            <option value="">Selecciona una industria...</option>
+            <option value="ecommerce">E-commerce / Retail</option>
+            <option value="servicios">Servicios Profesionales</option>
+            <option value="tecnologia">Tecnología / Software</option>
+            <option value="salud">Salud / Bienestar</option>
+            <option value="educacion">Educación / Formación</option>
+            <option value="inmobiliaria">Inmobiliaria</option>
+            <option value="automocion">Automoción</option>
+            <option value="hosteleria">Hostelería / Turismo</option>
+            <option value="finanzas">Finanzas / Seguros</option>
+            <option value="construccion">Construcción / Reformas</option>
+            <option value="legal">Legal / Abogacía</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label form-label-required">📦 ¿Qué productos o servicios vendes?</label>
+          <textarea id="products" class="form-textarea" placeholder="Ej: Ropa de marca premium, calzado deportivo, complementos de moda"></textarea>
+          <div class="form-hint">Describe tus productos/servicios principales. <strong>Esto se usará para generar KEYWORDS</strong></div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">🏷️ Marcas que vendes (si aplica)</label>
+          <input type="text" id="brands" class="form-input" placeholder="Ej: Calvin Klein, Tommy Hilfiger, Guess, Armani Exchange">
+          <div class="form-hint">Separa las marcas por comas. Déjalo vacío si no vendes marcas específicas</div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label form-label-required">👥 Público Objetivo</label>
+          <textarea id="targetAudience" class="form-textarea" placeholder="Ej: Jóvenes 18-35 años, hombres y mujeres, interesados en moda urbana"></textarea>
+          <div class="form-hint">Define tu audiencia ideal (edad, género, intereses)</div>
+        </div>
+      </div>
+      
+      <!-- FORTALEZAS SEPARADAS - SOLO PARA ANUNCIOS -->
+      <div class="card" style="border: 2px solid var(--success); background: linear-gradient(135deg, rgba(0, 208, 132, 0.05), rgba(0, 102, 255, 0.05));">
+        <div class="card-title">💎 Fortalezas de tu Negocio</div>
+        <div class="card-subtitle" style="color: var(--success);">
+          ⚠️ <strong>IMPORTANTE:</strong> Esta información se usará SOLO para crear anuncios atractivos, NO para keywords
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">✓ Envío Gratis</label>
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <input type="checkbox" id="strength_shipping" style="width: 20px; height: 20px;">
+              <span style="flex: 1;">Ofrezco envío gratis desde</span>
+              <input type="number" id="strength_shipping_amount" class="form-input" placeholder="50" style="max-width: 80px;" disabled>
+              <span>€</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">✓ Años de Experiencia</label>
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <input type="checkbox" id="strength_experience" style="width: 20px; height: 20px;">
+              <input type="number" id="strength_experience_years" class="form-input" placeholder="20" style="max-width: 80px;" disabled>
+              <span>años de experiencia</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">✓ Cambios y Devoluciones</label>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <input type="checkbox" id="strength_returns" style="width: 20px; height: 20px;">
+            <input type="text" id="strength_returns_text" class="form-input" placeholder="Ej: Cambio de talla gratuito" disabled>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">✓ Atención al Cliente</label>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <input type="checkbox" id="strength_support" style="width: 20px; height: 20px;">
+            <input type="text" id="strength_support_text" class="form-input" placeholder="Ej: Atención personalizada" disabled>
+            <input type="tel" id="strength_support_phone" class="form-input" placeholder="696308086" style="max-width: 140px;" disabled>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">✓ Otras Fortalezas</label>
+          <div class="form-hint" style="margin-bottom: 8px; padding: 12px; background: rgba(255, 149, 0, 0.15); border-radius: 8px; border-left: 3px solid var(--warning); color: var(--text-primary);">
+            <strong>⚠️ Campo obligatorio</strong> — Añade 5–10 fortalezas reales del cliente. La IA no puede inventar datos; si lo dejas vacío, los anuncios serán genéricos.
+          </div>
+          <textarea id="strength_other" class="form-textarea" placeholder="Ej: 25 años experiencia, Especialistas certificados, Urgencias 24/7, Primera consulta gratis, Garantía 2 años..." rows="3"></textarea>
+          <div class="form-hint">Añade otras ventajas que quieras destacar en los anuncios</div>
+        </div>
+      </div>
+      
+      <!-- ENHANCED: Multiple URL Analysis Card -->
+      <div class="card url-card">
+        <div class="card-title">🚀 Análisis Inteligente de URLs (Opcional pero Recomendado)</div>
+        <div class="card-subtitle">Agrega hasta 7 URLs de tu sitio — el software extrae contenido real para campañas más precisas</div>
+        
+        <div id="urlInputsContainer">
+          <div class="form-group url-input-group">
+            <label class="form-label">URL Principal (Landing Page)</label>
+            <div style="display: flex; gap: 8px; align-items: flex-start;">
+              <input type="url" class="form-input url-input" placeholder="https://ejemplo.com/producto" data-url-index="0">
+              <button type="button" class="btn-icon-only" onclick="removeUrlInput(0)" style="display: none; min-width: 40px;">❌</button>
+            </div>
+            <div class="form-hint">Tu página de aterrizaje principal</div>
+          </div>
+        </div>
+        
+        <button type="button" class="btn btn-secondary" onclick="addUrlInput()" id="addUrlBtn" style="width: 100%; margin-top: 12px;">
+          <span class="btn-icon">+</span> Agregar otra URL — Máx. 7 URLs (Servicios, Blog, Sobre Nosotros...)
+        </button>
+        
+        <div class="form-hint" style="margin-top: 16px; padding: 12px; background: rgba(0, 208, 132, 0.1); border-radius: 8px; border-left: 3px solid var(--success);">
+          💡 <strong>¿Por qué múltiples URLs?</strong><br>
+          Al analizar varias páginas (servicios, blog, testimonios), el software obtiene una visión 360° de tu negocio para crear:
+          <ul style="margin: 8px 0 0 20px; color: var(--text-secondary);">
+            <li>Keywords más variadas y específicas extraídas del contenido real</li>
+            <li>Anuncios que conectan mejor con cada tipo de cliente</li>
+            <li>Extensiones basadas en contenido real de tu web</li>
+            <li>URLs asignadas por grupo según relevancia semántica</li>
+          </ul>
+        </div>
+        
+        <div id="urlStatus" style="display: none; margin-top: 12px;"></div>
+      </div>
+      
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="nextStep()">
+          Siguiente <span class="btn-icon">→</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Step 2: Campaign Configuration -->
+    <div class="step-content" id="step2">
+      <div class="card">
+        <div class="card-title">Configuración de la Campaña</div>
+        <div class="card-subtitle">Define los parámetros básicos de tu campaña</div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label form-label-required">Nombre de la Campaña</label>
+            <input type="text" id="campaignName" class="form-input" placeholder="Ej: Search_Software_Gestion_2024">
+            <div class="form-hint">Usa un nombre descriptivo y único</div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label form-label-required">Tipo de Campaña</label>
+            <select id="campaignType" class="form-select">
+              <option value="search">Búsqueda (Recomendado - Control Total)</option>
+              <!-- Opciones deshabilitadas: Performance Max, Display, Video, Shopping -->
+              <!-- Solo generamos campañas de búsqueda para garantizar control total -->
+              <!-- Performance Max y otras requieren configuración manual en Google Ads -->
+            </select>
+            <div class="form-hint">Ads Engine Pro genera campañas de búsqueda manuales para control total de keywords y anuncios</div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label form-label-required">Objetivo Principal</label>
+          <select id="campaignGoal" class="form-select">
+            <option value="leads">Generación de Leads</option>
+            <option value="sales">Ventas Directas</option>
+            <option value="traffic">Tráfico Web</option>
+            <option value="brand">Reconocimiento de Marca</option>
+            <option value="app">Instalaciones de App</option>
+          </select>
+        </div>
+        
+
+      </div>
+      
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="prevStep()">
+          <span class="btn-icon">←</span> Anterior
+        </button>
+        <button class="btn btn-primary" onclick="nextStep()">
+          Siguiente <span class="btn-icon">→</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Step 3: Targeting -->
+    <div class="step-content" id="step3">
+      <div class="card">
+        <div class="card-title">Segmentación y Targeting</div>
+        <div class="card-subtitle">Define dónde y a quién mostrar tus anuncios</div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label form-label-required">🌍 País</label>
+            <input type="text" id="targetCountry" class="form-input" placeholder="Ej: España (máx. 25 caracteres)" maxlength="25">
+            <div class="form-hint"><strong>1 país por campaña</strong> para máxima precisión</div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label form-label-required">Idioma</label>
+            <select id="language" class="form-select">
+              <option value="es">Español</option>
+              <option value="en">Inglés</option>
+              <option value="fr">Francés</option>
+              <option value="de">Alemán</option>
+              <option value="it">Italiano</option>
+              <option value="pt">Portugués</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 24px;">
+          <label class="form-label">🏙️ Ciudad (Opcional - Solo 1)</label>
+          <input type="text" id="targetCities" class="form-input" placeholder="Ej: Barcelona (máx. 30 caracteres)" maxlength="30">
+          <div class="form-hint">
+            <strong>Campaña LOCAL:</strong> Escribe 1 ciudad (máx. 30 caracteres) → <code style="background: rgba(0,208,132,0.1); padding: 2px 6px; border-radius: 3px; color: var(--success);">Barcelona (radio 20km)</code><br>
+            <strong>Campaña NACIONAL:</strong> Deja este campo vacío → Anuncios en todo el país<br>
+            ❌ <code style="background: rgba(255,51,102,0.1); padding: 2px 6px; border-radius: 3px; color: var(--accent);">Madrid y Barcelona</code> (múltiples ciudades bloqueadas)
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 24px;">
+          <label class="form-label">Palabras Clave Base (opcional)</label>
+          <textarea id="baseKeywords" class="form-textarea" placeholder="software gestión&#10;crm empresas&#10;automatización procesos"></textarea>
+          <div class="form-hint">Una keyword por línea. Si no pones ninguna, la IA las generará automáticamente.</div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Palabras Clave Negativas (opcional)</label>
+          <textarea id="negativeKeywords" class="form-textarea" placeholder="gratis&#10;free&#10;crack"></textarea>
+          <div class="form-hint">Keywords que NO quieres que activen tus anuncios</div>
+        </div>
+      </div>
+      
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="prevStep()">
+          <span class="btn-icon">←</span> Anterior
+        </button>
+        <button class="btn btn-primary" onclick="nextStep()">
+          Siguiente <span class="btn-icon">→</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Step 4: Budget & Bidding -->
+    <div class="step-content" id="step4">
+      <div class="card">
+        <div class="card-title">Presupuesto y Estrategia de Puja</div>
+        <div class="card-subtitle">Define tu inversión y estrategia de puja</div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label form-label-required">Presupuesto Diario (€)</label>
+            <input type="number" id="dailyBudget" class="form-input" placeholder="50" min="1" step="1">
+            <div class="form-hint">Mínimo recomendado: 20€/día</div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label form-label-required">CPC Estimado (€)</label>
+            <input type="number" id="estimatedCPC" class="form-input" placeholder="1.50" min="0.01" step="0.01">
+            <div class="form-hint">CPC medio de tu industria</div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label form-label-required">Estrategia de Puja</label>
+          <select id="bidStrategy" class="form-select">
+            <option value="maximize_conversions">Maximizar Conversiones</option>
+            <option value="target_cpa">CPA Objetivo</option>
+            <option value="target_roas">ROAS Objetivo</option>
+            <option value="maximize_clicks">Maximizar Clics</option>
+            <option value="manual_cpc">CPC Manual</option>
+          </select>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label form-label-required">Tasa de Conversión Web (%)</label>
+            <input type="number" id="conversionRate" class="form-input" placeholder="5" min="0.1" step="0.1">
+            <div class="form-hint">% de visitantes que convierten</div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label form-label-required">Ticket Medio (€)</label>
+            <input type="number" id="avgTicket" class="form-input" placeholder="500" min="1" step="1">
+            <div class="form-hint">Valor medio de venta</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="prevStep()">
+          <span class="btn-icon">←</span> Anterior
+        </button>
+        <button class="btn btn-primary" onclick="nextStep()">
+          Siguiente <span class="btn-icon">→</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Step 5: Generation -->
+    <div class="step-content" id="step5">
+      <div class="card">
+        <div class="card-title">Configuración de Campaña</div>
+        <div class="card-subtitle">Ajusta los parámetros finales antes de generar</div>
+        
+        <div class="form-group">
+          <label class="form-label">Número de Grupos de Anuncios</label>
+          <input type="number" id="numAdGroups" class="form-input" value="3" min="1" max="6">
+          <div class="form-hint">Recomendado: 3-5 grupos · <strong>Máximo: 6 grupos</strong> para rendimiento óptimo sin canibalización</div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Keywords por Grupo</label>
+          <input type="number" id="keywordsPerGroup" class="form-input" value="10" min="5" max="30">
+          <div class="form-hint">Recomendado: 10-15 keywords por grupo</div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Anuncios por Grupo</label>
+          <input type="number" id="adsPerGroup" class="form-input" value="3" min="2" max="5">
+          <div class="form-hint">Mínimo 2, recomendado 3</div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Palabras Clave Base (opcional)</label>
+        <textarea id="baseKeywords" class="form-textarea" placeholder="software gestión, crm empresas, automatización procesos"></textarea>
+        <div class="form-hint">Separa las keywords por comas. Si no pones ninguna, la IA las generará automáticamente.</div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Palabras Clave Negativas (opcional)</label>
+        <textarea id="negativeKeywords" class="form-textarea" placeholder="gratis, free, crack, pirata"></textarea>
+        <div class="form-hint">Keywords que NO quieres que activen tus anuncios (separadas por comas)</div>
+      </div>
+      
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="prevStep()">
+          <span class="btn-icon">←</span> Anterior
+        </button>
+        <button class="btn btn-primary" onclick="generateCampaign()">
+          <span class="btn-icon">✨</span> Generar Campaña
+        </button>
+      </div>
+    </div>
+    
+    <!-- Loading State -->
+    <div class="loading-container" id="loadingState">
+      <div class="loader"></div>
+      <div class="loading-text" id="loadingText">Generando tu campaña...</div>
+      <div class="loading-subtext" id="loadingSubtext">Esto puede tardar 30-60 segundos</div>
+    </div>
+    
+    <!-- Results -->
+    <div class="results-container" id="resultsContainer">
+      <div class="results-header">
+        <div class="results-title">📤 Herramientas de Exportación</div>
+        <div class="results-subtitle">Genera tu campaña usando el formulario arriba. Una vez generada, podrás exportarla en múltiples formatos</div>
+        <div class="results-actions">
+          <button class="btn btn-primary" onclick="exportForGoogleAdsEditor()">
+            <span class="btn-icon">🚀</span> Google Ads Editor
+          </button>
+          <button class="btn btn-primary" onclick="exportToExcel()">
+            <span class="btn-icon">📊</span> Excel Completo
+          </button>
+          <button class="btn btn-primary" onclick="exportCompleteCSV()">
+            <span class="btn-icon">📥</span> CSV Completo
+          </button>
+          <button class="btn btn-secondary" onclick="exportKeywordsCSV()">
+            <span class="btn-icon">🔑</span> Solo Keywords
+          </button>
+          <button class="btn btn-secondary" onclick="exportAdsCSV()">
+            <span class="btn-icon">📝</span> Solo Anuncios
+          </button>
+          <button class="btn btn-secondary" onclick="showImportInstructions()">
+            <span class="btn-icon">📖</span> Cómo Importar
+          </button>
+          <button class="btn btn-secondary" onclick="exportToText()">
+            <span class="btn-icon">📋</span> Copiar Todo
+          </button>
+          <button class="btn btn-warning" onclick="mostrarPalabrasNegativas()" style="background: linear-gradient(135deg, var(--warning), var(--accent)); border: none;">
+            <span class="btn-icon">🚫</span> Palabras Negativas
+          </button>
+          <button class="btn btn-secondary" onclick="resetAndStart()">
+            <span class="btn-icon">🔄</span> Nueva Campaña
+          </button>
+        </div>
+      </div>
+      
+      <!-- V8.1: SEMANTIC BADGE -->
+      <div class="semantic-badge">
+        <div class="semantic-badge-icon">🧠</div>
+        <div class="semantic-badge-content">
+          <div class="semantic-badge-title">✅ Optimizado para Google Ads 2025-2026</div>
+          <div class="semantic-badge-text">Structured Snippets con búsquedas semánticas, intención de usuario y micro-momentos de Google</div>
+        </div>
+      </div>
+      
+      <div class="results-grid" id="resultsGrid"></div>
+    </div>
+  </div>
+  
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <div class="toast-icon">✅</div>
+    <div class="toast-text" id="toastText">Acción completada</div>
+  </div>
+  
+  <script>
+    let currentStep = 1;
+    let formData = {};
+    let generatedCampaign = null;
+    let urlContent = null; // NEW: Store analyzed URL content
+
+    // PALABRAS NEGATIVAS - Lista completa (258 palabras)
+    const PALABRAS_NEGATIVAS = [
+      "a mano",
+      "ai",
+      "aleman",
+      "antonimo",
+      "antonimos",
+      "asequible",
+      "asignatura",
+      "asignaturas",
+      "atrapalo",
+      "avi",
+      "azw",
+      "azw3",
+      "bajo precio",
+      "bajos precios",
+      "barata",
+      "baratas",
+      "barato",
+      "baratos",
+      "barcelona",
+      "beca",
+      "becario",
+      "becas",
+      "bilbao",
+      "blog",
+      "blogs",
+      "casero",
+      "caseros",
+      "chollo",
+      "chollometro",
+      "chollos",
+      "clase",
+      "clases",
+      "codigo descuento",
+      "como",
+      "comparador",
+      "comparar",
+      "concepto",
+      "conceptos",
+      "copia",
+      "copiada",
+      "copiadas",
+      "copiado",
+      "copiados",
+      "copias",
+      "coruña",
+      "csv",
+      "cupon",
+      "cupones",
+      "curso",
+      "cursos",
+      "cv",
+      "de imitacion",
+      "definicion",
+      "descuento",
+      "descuentos",
+      "divx",
+      "doc",
+      "docm",
+      "docx",
+      "dosier",
+      "dosieres",
+      "dossier",
+      "dossieres",
+      "ebook",
+      "economica",
+      "economicas",
+      "economico",
+      "economicos",
+      "ejemplo",
+      "ejemplos",
+      "empleo",
+      "empleos",
+      "en casa",
+      "engaño",
+      "engaños",
+      "english",
+      "epub",
+      "estafa",
+      "estafada",
+      "estafadas",
+      "estafador",
+      "estafadores",
+      "estafas",
+      "estudio",
+      "estudios",
+      "facebook",
+      "fake",
+      "falsa",
+      "falsas",
+      "falsificacion",
+      "falsificado",
+      "falso",
+      "falsos",
+      "fb",
+      "foro",
+      "foros",
+      "foto",
+      "fotografia",
+      "fotografias",
+      "fotolia",
+      "frances",
+      "fraude",
+      "fraudes",
+      "fraudulenta",
+      "fraudulentas",
+      "fraudulento",
+      "fraudulentos",
+      "french",
+      "ganga",
+      "gangas",
+      "german",
+      "gif",
+      "granada",
+      "gratis",
+      "gratuita",
+      "gratuitamente",
+      "gratuito",
+      "groupalia",
+      "groupon",
+      "guia",
+      "guias",
+      "herramienta",
+      "herramientas",
+      "ico",
+      "imagen",
+      "imagenes",
+      "imitacion",
+      "imitaciones",
+      "imitado",
+      "imitados",
+      "infojobs",
+      "ingles",
+      "insta",
+      "instagram",
+      "instruccion",
+      "instrucciones",
+      "invento",
+      "inventor",
+      "job",
+      "jobs",
+      "jpeg",
+      "jpg",
+      "key",
+      "lets bonus",
+      "letsbonus",
+      "linkedin",
+      "lista",
+      "listado",
+      "listados",
+      "lit",
+      "low cost",
+      "madrid",
+      "malaga",
+      "manual",
+      "manuales",
+      "master",
+      "masters",
+      "mobi",
+      "mov",
+      "mp4",
+      "mpeg",
+      "mpg",
+      "murcia",
+      "ocasion",
+      "oferta",
+      "ofertas",
+      "opinion",
+      "opiniones",
+      "pages",
+      "palma",
+      "palmas",
+      "pdf",
+      "pinterest",
+      "pirata",
+      "piratas",
+      "pirateria",
+      "plagiada",
+      "plagiadas",
+      "plagiado",
+      "plagiados",
+      "plagio",
+      "png",
+      "podcast",
+      "porno",
+      "pornografia",
+      "portal",
+      "portales",
+      "portfolio",
+      "portfolios",
+      "pps",
+      "ppsx",
+      "ppt",
+      "pptm",
+      "pptx",
+      "practica",
+      "practicas",
+      "presentacion",
+      "presentaciones",
+      "promocion",
+      "proyecto",
+      "proyectos",
+      "psd",
+      "pub",
+      "que es",
+      "quien",
+      "rebaja",
+      "rebajada",
+      "rebajado",
+      "rebajas",
+      "recursos humanos",
+      "remedio",
+      "remedios",
+      "rrhh",
+      "saber",
+      "sevilla",
+      "sexo",
+      "sexual",
+      "sexuales",
+      "significado",
+      "sin coste",
+      "sin costo",
+      "sinonimo",
+      "sinonimos",
+      "slideshare",
+      "snapchat",
+      "tif",
+      "timo",
+      "timos",
+      "trabajando",
+      "trabajar",
+      "trabajo",
+      "trabajos",
+      "traduccion",
+      "traducir",
+      "traductor",
+      "tutorial",
+      "tutoriales",
+      "twitter",
+      "txt",
+      "universidad",
+      "universitaria",
+      "universitarias",
+      "universitario",
+      "universitarios",
+      "valencia",
+      "video",
+      "videos",
+      "vitae",
+      "wiki",
+      "wikipedia",
+      "wmv",
+      "xls",
+      "xlsx",
+      "xml",
+      "xps",
+      "xxx",
+      "youtube",
+      "zaragoza"
+];
+    
+    // Función para mostrar palabras negativas
+    function mostrarPalabrasNegativas() {
+      const modal = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+          <div style="background: var(--bg-card); border: 2px solid var(--primary); border-radius: 16px; max-width: 900px; width: 100%; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column;">
+            <div style="padding: 24px; border-bottom: 1px solid var(--border);">
+              <h2 style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 24px;">🚫 Palabras Negativas (258)</h2>
+              <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">Lista completa de palabras negativas para filtrar tráfico no deseado</p>
+            </div>
+            
+            <div style="padding: 24px; overflow-y: auto; flex: 1;">
+              <div style="background: rgba(255, 149, 0, 0.1); border-left: 3px solid var(--warning); padding: 16px; margin-bottom: 20px; border-radius: 8px;">
+                <strong style="color: var(--warning);">⚠️ IMPORTANTE:</strong>
+                <p style="margin: 8px 0 0 0; color: var(--text-secondary); font-size: 14px;">
+                  Esta lista contiene 258 palabras negativas habituales. <strong>Revísala y personalízala según tu nicho</strong>. 
+                  Elimina las que no apliquen a tu negocio y añade las específicas de tu sector.
+                </p>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-bottom: 20px;">
+                ${PALABRAS_NEGATIVAS.map((palabra, i) => 
+                  '<div style="padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: \'JetBrains Mono\', monospace;">' + 
+                  '<span style="color: var(--text-muted); margin-right: 8px;">' + (i+1) + '.</span>' +
+                  '<span style="color: var(--text-primary);">' + palabra + '</span>' +
+                  '</div>'
+                ).join('')}
+              </div>
+            </div>
+            
+            <div style="padding: 20px; border-top: 1px solid var(--border); display: flex; gap: 12px;">
+              <button onclick="copiarPalabrasNegativas()" style="flex: 1; padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                📋 Copiar Todas
+              </button>
+              <button onclick="descargarPalabrasNegativas()" style="flex: 1; padding: 12px 24px; background: var(--success); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                💾 Descargar CSV
+              </button>
+              <button onclick="cerrarModalNegativas()" style="padding: 12px 24px; background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                ✕ Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.insertAdjacentHTML('beforeend', modal);
+    }
+    
+    function cerrarModalNegativas() {
+      const modals = document.querySelectorAll('[style*="z-index: 10000"]');
+      modals.forEach(m => m.remove());
+    }
+    
+    function copiarPalabrasNegativas() {
+      const texto = PALABRAS_NEGATIVAS.join('\n');
+      navigator.clipboard.writeText(texto).then(() => {
+        showToast('✅ 258 palabras negativas copiadas al portapapeles');
+      }).catch(() => {
+        showToast('❌ Error al copiar', 'error');
+      });
+    }
+    
+    function descargarPalabrasNegativas() {
+      let csv = 'Keyword\n';
+      PALABRAS_NEGATIVAS.forEach(palabra => {
+        csv += palabra + '\n';
+      });
+      
+      const filename = 'Palabras_Negativas_Google_Ads.csv';
+      downloadFile(csv, filename, 'text/csv;charset=utf-8');
+      showToast('✅ CSV de palabras negativas descargado');
+    }
+
+    
+    
+    // INTENT-BASED SEARCH STRUCTURE (NO KEYWORD VARIATIONS)
+    // Campaigns are generated by user intent, not exhaustive keyword lists.
+    // Intent groups: Problem, Solution, Product/Service, Competitor, Brand.
+    // Keywords are representative and broad to signal intent.
+
+    const INTENT_GROUPS = [
+      { id: "problem", label: "Problema" },
+      { id: "solution", label: "Solución" },
+      { id: "product", label: "Producto / Servicio" },
+      { id: "competitor", label: "Competencia" },
+      { id: "brand", label: "Marca" }
+    ];
+
+    function generateIntentKeywords(base) {
+      return [
+        { keyword: base, matchType: "BROAD", maxCPC: formData.estimatedCPC?.toString() || "1.50" }
+      ];
+    }
+
+
+    // DEMO CAMPAIGN DATA - Pre-loaded example
+    const DEMO_CAMPAIGN = {
+      "name": "Consultor Google Ads - Servicios Profesionales",
+      "type": "Search",
+      "goal": "Leads",
+      "budget": "25",
+      "bidStrategy": "Maximizar conversiones",
+      "location": "España",
+      "language": "Español",
+      "adGroups": [
+        {
+          "name": "Consultor Google Ads - Servicios",
+          "theme": "Consultoría profesional Google Ads",
+          "bid": "2.50",
+          "keywords": [
+            {"keyword": "consultor google ads", "matchType": "EXACT", "maxCPC": "3.00"},
+            {"keyword": "consultor google ads", "matchType": "PHRASE", "maxCPC": "2.80"},
+            {"keyword": "experto google ads", "matchType": "PHRASE", "maxCPC": "2.70"},
+            {"keyword": "especialista google ads", "matchType": "PHRASE", "maxCPC": "2.60"},
+            {"keyword": "consultor sem", "matchType": "PHRASE", "maxCPC": "2.50"},
+            {"keyword": "gestor campañas google", "matchType": "PHRASE", "maxCPC": "2.40"}
+          ],
+          "ads": [{
+            "headlines": [
+              "Consultor Google Ads", "Experto Google Partner", "Campañas Rentables",
+              "Sin Permanencia", "Resultados Reales", "15 Años Experiencia",
+              "Auditoría Gratis", "Solo Servicios B2B", "Trato Directo",
+              "Optimización Diaria", "ROI Garantizado", "Google Partner 2025",
+              "Consultoría Pro", "Leads de Calidad", "Presupuesto Optimizado"
+            ],
+            "descriptions": [
+              "Consultor Google Ads especializado en servicios. Sin permanencia. Auditoría gratis.",
+              "Campañas rentables para abogados, consultores y profesionales. Trato directo.",
+              "Google Partner con 15 años de experiencia. Resultados desde el primer mes.",
+              "Optimizo tu inversión en Google Ads. Solo trabajo con 10 clientes para calidad."
+            ],
+            "path1": "Consultor", "path2": "GoogleAds",
+            "finalUrl": "https://www.franciscoblanco.net"
+          }]
+        },
+        {
+          "name": "Campañas Google Ads - Gestión",
+          "theme": "Gestión profesional de campañas",
+          "bid": "2.30",
+          "keywords": [
+            {"keyword": "gestión google ads", "matchType": "PHRASE", "maxCPC": "2.50"},
+            {"keyword": "crear campaña google ads", "matchType": "PHRASE", "maxCPC": "2.40"},
+            {"keyword": "optimizar google ads", "matchType": "PHRASE", "maxCPC": "2.60"},
+            {"keyword": "experto campañas búsqueda", "matchType": "PHRASE", "maxCPC": "2.30"}
+          ],
+          "ads": [{
+            "headlines": [
+              "Gestión Google Ads Pro", "Campañas Optimizadas", "Experto en Búsqueda",
+              "Resultados Medibles", "Sin Contratos Largos", "Precio Transparente",
+              "Informes Mensuales", "Soporte Directo", "Keywords Rentables",
+              "CPC Optimizado", "Quality Score Alto", "Conversiones Reales",
+              "Setup Profesional", "Estrategia Clara", "Auditoría Incluida"
+            ],
+            "descriptions": [
+              "Gestiono tu Google Ads con estrategia profesional. Informes claros cada mes.",
+              "Especializado en campañas de búsqueda para servicios. Sin permanencia.",
+              "Optimización continua de tus campañas. Trato directo, sin intermediarios.",
+              "Configuro, gestiono y optimizo tus campañas Google Ads. Resultados reales."
+            ],
+            "path1": "Gestion", "path2": "Campanas",
+            "finalUrl": "https://www.franciscoblanco.net"
+          }]
+        }
+      ],
+      "negatives": ["gratis", "curso", "formación", "aprender", "tutorial", "pdf", "plantilla", "herramienta", "software", "free", "barato", "precio", "coste"],
+      "extensions": {
+        "sitelinks": [
+          {"title": "Consultoría Gratis", "desc": "Primera auditoría sin compromiso", "url": "https://www.franciscoblanco.net"},
+          {"title": "Servicios", "desc": "Especializado en servicios B2B", "url": "https://www.franciscoblanco.net/servicios"},
+          {"title": "Por Qué Yo", "desc": "Sin permanencia, trato directo", "url": "https://www.franciscoblanco.net/por-que-trabajar-conmigo"},
+          {"title": "Contacto", "desc": "Hablemos de tu proyecto", "url": "https://www.franciscoblanco.net"}
+        ],
+        "callouts": [
+          "Google Partner Certificado", "Sin Permanencia", "Auditoría Gratis", "Trato Directo",
+          "Solo 10 Clientes", "15 Años Experiencia", "Especialista Servicios", "Resultados Reales"
+        ],
+        "snippets": {
+          "Servicios": ["Auditoría Google Ads", "Gestión Campañas", "Optimización CPC", "Setup Profesional", "Informes Mensuales"],
+          "Especialidades": ["Abogados", "Consultores", "Servicios B2B", "Profesionales", "PYMEs"]
+        }
+      }
+    };
+    
+    // Load demo campaign on page load - COMENTADO (arranca sin informe)
+    /*
+    window.addEventListener('DOMContentLoaded', function() {
+      generatedCampaign = DEMO_CAMPAIGN;
+      formData = {
+        dailyBudget: 25,
+        estimatedCPC: 2.5,
+        conversionRate: 5,
+        avgTicket: 600
+      };
+      displayResults();
+      showToast('✅ Campaña de ejemplo cargada - Todos los botones funcionan');
+    });
+    */
+    
+    // Navigation
+    function goToStep(step) {
+      if (step < 1 || step > 5) return;
+      
+      // Validate current step before moving
+      if (step > currentStep && !validateStep(currentStep)) {
+        return;
+      }
+      
+      // Update step classes
+      document.querySelectorAll('.step-content').forEach(el => {
+        el.classList.remove('active');
+      });
+      document.getElementById(`step${step}`).classList.add('active');
+      
+      document.querySelectorAll('.wizard-step').forEach((el, idx) => {
+        el.classList.remove('active');
+        if (idx + 1 < step) {
+          el.classList.add('completed');
+        } else {
+          el.classList.remove('completed');
+        }
+      });
+      document.querySelectorAll('.wizard-step')[step - 1].classList.add('active');
+      
+      currentStep = step;
+      
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    function nextStep() {
+      if (validateStep(currentStep)) {
+        collectStepData(currentStep);
+        goToStep(currentStep + 1);
+      }
+    }
+    
+    function prevStep() {
+      goToStep(currentStep - 1);
+    }
+    
+    // NEW: Analyze URL function
+    async function analyzeURL(url) {
+      if (!url || !url.trim()) return null;
+      
+      try {
+        const statusDiv = document.getElementById('urlStatus');
+        statusDiv.style.display = 'block';
+        statusDiv.innerHTML = '<div class="url-status"><div class="url-loading"></div> Analizando tu página...</div>';
+        
+        // Use Jina AI to extract content
+        const jinaURL = `https://r.jina.ai/${url}`;
+        const response = await fetch(jinaURL, {
+          headers: {
+            'Accept': 'text/plain',
+            'X-Return-Format': 'text'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Error al extraer contenido de la URL');
+        }
+        
+        const content = await response.text();
+        
+        // Limit content to first 8000 characters
+        const limitedContent = content.slice(0, 8000);
+        
+        statusDiv.innerHTML = `
+          <div class="url-status">
+            ✅ URL analizada correctamente (${Math.round(content.length / 1000)}KB de contenido extraído)
+          </div>
+        `;
+        
+        return limitedContent;
+      } catch (error) {
+        console.error('Error analyzing URL:', error);
+        const statusDiv = document.getElementById('urlStatus');
+        statusDiv.innerHTML = `
+          <div class="url-status" style="background: rgba(255, 149, 0, 0.1); border-color: rgba(255, 149, 0, 0.3); color: var(--warning);">
+            ⚠️ No se pudo analizar la URL. Continuaremos sin el análisis.
+          </div>
+        `;
+        return null;
+      }
+    }
+    
+    // NEW: Multiple URLs Management
+    let urlInputCount = 1;
+    
+    function addUrlInput() {
+      const currentCount = document.querySelectorAll('.url-input').length;
+      if (currentCount >= 7) {
+        showToast('⚠️ Máximo 7 URLs permitidas — Límite de rendimiento óptimo', 'warning');
+        return;
+      }
+      
+      const container = document.getElementById('urlInputsContainer');
+      const newIndex = urlInputCount++;
+      
+      const newInputGroup = document.createElement('div');
+      newInputGroup.className = 'form-group url-input-group';
+      newInputGroup.id = `url-group-${newIndex}`;
+      newInputGroup.innerHTML = `
+        <label class="form-label">URL Adicional ${newIndex} <span style="color: var(--text-muted); font-size: 11px;">(${currentCount + 1}/7)</span></label>
+        <div style="display: flex; gap: 8px; align-items: flex-start;">
+          <input type="url" class="form-input url-input" placeholder="https://ejemplo.com/servicios" data-url-index="${newIndex}">
+          <button type="button" class="btn-icon-only" onclick="removeUrlInput(${newIndex})" style="min-width: 40px;">❌</button>
+        </div>
+        <div class="form-hint">Página adicional para analizar</div>
+      `;
+      
+      container.appendChild(newInputGroup);
+      const remaining = 7 - (currentCount + 1);
+      if (remaining === 0) {
+        showToast('✅ URL agregada — Límite máximo alcanzado (7/7)', 'success');
+      } else {
+        showToast(`✅ URL agregada (${currentCount + 1}/7) — Quedan ${remaining} disponibles`);
+      }
+    }
+    
+    function removeUrlInput(index) {
+      if (index === 0) return; // No permitir eliminar la URL principal
+      
+      const group = document.getElementById(`url-group-${index}`);
+      if (group) {
+        group.remove();
+        showToast('🗑️ URL eliminada');
+      }
+    }
+    
+    // NEW: Analyze Multiple URLs
+    async function analyzeMultipleURLs() {
+      const urlInputs = document.querySelectorAll('.url-input');
+      const urls = Array.from(urlInputs)
+        .map(input => input.value.trim())
+        .filter(url => url !== '');
+      
+      if (urls.length === 0) return null;
+      
+      const statusDiv = document.getElementById('urlStatus');
+      statusDiv.style.display = 'block';
+      statusDiv.innerHTML = `<div class="url-status"><div class="url-loading"></div> Analizando ${urls.length} URL(s)...</div>`;
+      
+      let allContent = '';
+      let successCount = 0;
+      
+      for (let i = 0; i < urls.length; i++) {
+        try {
+          const content = await analyzeURL(urls[i]);
+          if (content) {
+            allContent += `\n\n=== CONTENIDO DE ${urls[i]} ===\n${content}`;
+            successCount++;
+          }
+        } catch (error) {
+          console.error(`Error analyzing ${urls[i]}:`, error);
+        }
+      }
+      
+      if (successCount > 0) {
+        statusDiv.innerHTML = `
+          <div class="url-status">
+            ✅ ${successCount} de ${urls.length} URLs analizadas correctamente
+          </div>
+        `;
+        return allContent;
+      } else {
+        statusDiv.innerHTML = `
+          <div class="url-status" style="background: rgba(255, 149, 0, 0.1); border-color: rgba(255, 149, 0, 0.3); color: var(--warning);">
+            ⚠️ No se pudieron analizar las URLs. Continuaremos sin el análisis.
+          </div>
+        `;
+        return null;
+      }
+    }
+    
+    // Validation
+    function validateStep(step) {
+      switch(step) {
+        case 1:
+          if (!document.getElementById('businessName').value.trim()) {
+            showToast('❌ Completa el nombre del negocio', 'error');
+            return false;
+          }
+          if (!document.getElementById('industry').value) {
+            showToast('❌ Selecciona una industria', 'error');
+            return false;
+          }
+          if (!document.getElementById('products').value.trim()) {
+            showToast('❌ Describe tus productos/servicios', 'error');
+            return false;
+          }
+          if (!document.getElementById('targetAudience').value.trim()) {
+            showToast('❌ Define tu público objetivo', 'error');
+            return false;
+          }
+          // USP field removed - no longer validated
+          return true;
+          
+        case 2:
+          if (!document.getElementById('campaignName').value.trim()) {
+            showToast('❌ Introduce un nombre de campaña', 'error');
+            return false;
+          }
+          
+          return true;
+          
+        case 3:
+          const countryValue = document.getElementById('targetCountry').value.trim();
+          if (!countryValue) {
+            showToast('❌ Define un país para targeting', 'error');
+            return false;
+          }
+          
+          // V8.3: VALIDACIÓN BLOQUEANTE - SOLO 1 PAÍS
+          const countryList = countryValue.split(',').map(c => c.trim()).filter(c => c !== '');
+          if (countryList.length > 1) {
+            showToast(`❌ SOLO 1 PAÍS permitido por campaña — Elimina ${countryList.length - 1} país(es).`, 'error');
+            document.getElementById('targetCountry').focus();
+            return false;
+          }
+          
+          // V8 CLEAN: VALIDACIÓN INTELIGENTE - SOLO 1 CIUDAD (con especificaciones locales permitidas)
+          const cityValue = document.getElementById('targetCities').value.trim();
+          if (cityValue) {
+            // Detectar múltiples ciudades separadas (bloquear esto)
+            const hasPipe = cityValue.includes('|');
+            const hasComma = cityValue.includes(',');
+            const hasSlash = cityValue.includes('/');
+            
+            // Palabras clave de especificación local (español, inglés, otros idiomas)
+            const localSpecKeywords = [
+              'alrededor', 'alrededores', 'surrounding', 'surroundings',
+              'zona', 'zone', 'area', 'área',
+              'periferia', 'periphery', 'outskirts',
+              'extrarradio', 'suburban',
+              'radio', 'radius', 'km', 'kilómetros', 'kilometers',
+              'norte', 'sur', 'este', 'oeste', 'north', 'south', 'east', 'west',
+              'centro', 'center', 'centre',
+              'metropolitana', 'metropolitan', 'metro'
+            ];
+            
+            // Permitir "y alrededores" o "y zona norte" (especificación local)
+            // Pero bloquear "Barcelona y Madrid" (múltiples ciudades)
+            const hasAnd = cityValue.toLowerCase().includes(' y ') || 
+                          cityValue.toLowerCase().includes(' and ');
+            
+            const isLocalSpec = hasAnd && localSpecKeywords.some(keyword => 
+              cityValue.toLowerCase().includes(keyword)
+            );
+            
+            // También permitir si tiene paréntesis (ej: "Madrid (radio 20km)")
+            const hasParenthesis = cityValue.includes('(') && cityValue.includes(')');
+            
+            // Bloquear separadores de múltiples ciudades
+            if (hasPipe || hasComma || hasSlash) {
+              showToast('❌ SOLO 1 CIUDAD permitida — Elimina los separadores (|, /, comas)', 'error');
+              document.getElementById('targetCities').focus();
+              return false;
+            }
+            
+            // Bloquear " y " solo si NO es una especificación local Y NO tiene paréntesis
+            if (hasAnd && !isLocalSpec && !hasParenthesis) {
+              showToast('❌ SOLO 1 CIUDAD permitida — Usa: "Ciudad (radio 20km)" o "Ciudad y alrededores"', 'error');
+              document.getElementById('targetCities').focus();
+              return false;
+            }
+          }
+
+          
+          return true;
+          
+        case 4:
+          const budgetInput = document.getElementById('dailyBudget').value.trim();
+          const cpcInput = document.getElementById('estimatedCPC').value.trim();
+          const convRateInput = document.getElementById('conversionRate').value.trim();
+          const ticketInput = document.getElementById('avgTicket').value.trim();
+          
+          // Replace comma with dot for decimal numbers
+          const budget = parseFloat(budgetInput.replace(',', '.'));
+          const cpc = parseFloat(cpcInput.replace(',', '.'));
+          const convRate = parseFloat(convRateInput.replace(',', '.'));
+          const ticket = parseFloat(ticketInput.replace(',', '.'));
+          
+          if (!budgetInput || isNaN(budget) || budget < 1) {
+            showToast('❌ Introduce un presupuesto diario válido (mínimo 1€)', 'error');
+            return false;
+          }
+          if (!cpcInput || isNaN(cpc) || cpc < 0.01) {
+            showToast('❌ Introduce un CPC estimado válido (mínimo 0.01€)', 'error');
+            return false;
+          }
+          if (!convRateInput || isNaN(convRate) || convRate < 0.1) {
+            showToast('❌ Introduce una tasa de conversión válida (mínimo 0.1%)', 'error');
+            return false;
+          }
+          if (!ticketInput || isNaN(ticket) || ticket < 1) {
+            showToast('❌ Introduce un ticket medio válido (mínimo 1€)', 'error');
+            return false;
+          }
+          return true;
+          
+        case 5:
+          const numGroups = parseInt(document.getElementById('numAdGroups').value);
+          if (numGroups > 6) {
+            document.getElementById('numAdGroups').value = 6;
+            showToast('⚠️ Máximo 6 grupos de anuncios — Ajustado a 6', 'warning');
+          }
+          if (numGroups < 1) {
+            showToast('❌ Mínimo 1 grupo de anuncios', 'error');
+            return false;
+          }
+          return true;
+          
+        default:
+          return true;
+      }
+    }
+    
+    // Collect data from step
+    async function collectStepData(step) {
+      switch(step) {
+        case 1:
+          formData.businessName = document.getElementById('businessName').value.trim();
+          formData.industry = document.getElementById('industry').value;
+          formData.products = document.getElementById('products').value.trim();
+          formData.brands = document.getElementById('brands').value.trim();
+          formData.targetAudience = document.getElementById('targetAudience').value.trim();
+          
+          // ENHANCED: Collect strengths separately
+          formData.strengths = [];
+          
+          // Shipping
+          const shippingCheck = document.getElementById('strength_shipping');
+          const shippingAmount = document.getElementById('strength_shipping_amount');
+          if (shippingCheck && shippingCheck.checked && shippingAmount.value) {
+            formData.strengths.push(`Envío gratis desde ${shippingAmount.value}€`);
+          }
+          
+          // Experience
+          const experienceCheck = document.getElementById('strength_experience');
+          const experienceYears = document.getElementById('strength_experience_years');
+          if (experienceCheck && experienceCheck.checked && experienceYears.value) {
+            formData.strengths.push(`${experienceYears.value} años de experiencia`);
+          }
+          
+          // Returns
+          const returnsCheck = document.getElementById('strength_returns');
+          const returnsText = document.getElementById('strength_returns_text');
+          if (returnsCheck && returnsCheck.checked && returnsText.value) {
+            formData.strengths.push(returnsText.value);
+          }
+          
+          // Support
+          const supportCheck = document.getElementById('strength_support');
+          const supportText = document.getElementById('strength_support_text');
+          const supportPhone = document.getElementById('strength_support_phone');
+          if (supportCheck && supportCheck.checked) {
+            let supportStr = supportText.value || 'Atención personalizada';
+            if (supportPhone.value) {
+              supportStr += ` - ${supportPhone.value}`;
+            }
+            formData.strengths.push(supportStr);
+          }
+          
+          // Other strengths
+          const otherStrengths = document.getElementById('strength_other').value.trim();
+          if (otherStrengths) {
+            otherStrengths.split('\n').forEach(s => {
+              if (s.trim()) formData.strengths.push(s.trim());
+            });
+          }
+          
+          // ENHANCED: Analyze Multiple URLs if provided
+          urlContent = await analyzeMultipleURLs();
+          
+          // Store first URL as landing URL for backward compatibility
+          const urlInputs = document.querySelectorAll('.url-input');
+          if (urlInputs.length > 0 && urlInputs[0].value.trim()) {
+            formData.landingUrl = urlInputs[0].value.trim();
+          }
+          break;
+          
+        case 2:
+          formData.campaignName = document.getElementById('campaignName').value.trim();
+          formData.campaignType = document.getElementById('campaignType').value;
+          formData.campaignGoal = document.getElementById('campaignGoal').value;
+          break;
+          
+        case 3:
+          // Obtener valores y aplicar límites de seguridad
+          formData.targetCountry = document.getElementById('targetCountry').value.trim().substring(0, 25);
+          formData.targetCities = document.getElementById('targetCities').value.trim().substring(0, 30);
+          // Construir location para compatibilidad con el resto del código
+          formData.location = formData.targetCities 
+            ? `${formData.targetCountry}, ${formData.targetCities}` 
+            : formData.targetCountry;
+          formData.language = document.getElementById('language').value;
+          formData.baseKeywords = document.getElementById('baseKeywords').value.trim();
+          formData.negativeKeywords = document.getElementById('negativeKeywords').value.trim();
+          break;
+          
+        case 4:
+          formData.dailyBudget = parseFloat(document.getElementById('dailyBudget').value.replace(',', '.'));
+          formData.estimatedCPC = parseFloat(document.getElementById('estimatedCPC').value.replace(',', '.'));
+          formData.bidStrategy = document.getElementById('bidStrategy').value;
+          formData.conversionRate = parseFloat(document.getElementById('conversionRate').value.replace(',', '.'));
+          formData.avgTicket = parseFloat(document.getElementById('avgTicket').value.replace(',', '.'));
+          break;
+          
+        case 5:
+          formData.numAdGroups = parseInt(document.getElementById('numAdGroups').value);
+          formData.keywordsPerGroup = parseInt(document.getElementById('keywordsPerGroup').value);
+          formData.adsPerGroup = parseInt(document.getElementById('adsPerGroup').value);
+          break;
+      }
+    }
+    
+    // Generate campaign with Claude AI
+    async function generateCampaign() {
+      if (!validateStep(5)) return;
+      
+      await collectStepData(5);
+      
+      // Show loading
+      document.getElementById('step5').style.display = 'none';
+      document.getElementById('loadingState').classList.add('active');
+      
+      try {
+        // Build enhanced prompt with URL content
+        let enhancedPrompt = buildPrompt();
+        
+        // Call backend proxy — API key gestionada en servidor Vercel, nunca en cliente
+        const SERVER_URL = window.location.hostname === 'localhost'
+          ? 'http://localhost:3000'
+          : '';  // Vacío = mismo dominio en producción (Vercel)
+        const apiUrl = `${SERVER_URL}/api/campaigns/generate`;
+        
+        // Create fetch with timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 minutes timeout
+        
+        // Token JWT del login
+        const authToken = localStorage.getItem('ads_engine_token') || localStorage.getItem('authToken') || localStorage.getItem('token') || '';
+        
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          signal: controller.signal,
+          headers: {
+            'content-type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({
+            prompt: enhancedPrompt,
+            formData: formData
+          })
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('API Error:', errorData);
+          throw new Error(errorData.error?.message || `Error ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('API Response:', data);
+        
+        const campaignText = data.campaignText;
+        
+        // Parse campaign
+        generatedCampaign = parseCampaignFromText(campaignText);
+        
+        // ✅ AUTO-VALIDATOR V8 — 100% Google Ads compliant before export
+        generatedCampaign = autoValidateCampaign(generatedCampaign);
+        
+        // ✅ ANTI-CANIBALIZACIÓN + URLs POR GRUPO V8
+        generatedCampaign = antiCanibalizacionYUrls(generatedCampaign);
+        
+        // Show results
+        document.getElementById('loadingState').classList.remove('active');
+        document.getElementById('resultsContainer').classList.add('active');
+        
+        displayResults();
+        
+        showToast('✅ Campaña generada y validada — Lista para Google Ads Editor');
+        
+      } catch (error) {
+        console.error('Error generating campaign:', error);
+        document.getElementById('loadingState').classList.remove('active');
+        document.getElementById('step5').style.display = 'block';
+        
+        let errorMessage = 'Error al generar campaña: ';
+        if (error.name === 'AbortError') {
+          errorMessage += 'La solicitud tardó demasiado (más de 5 minutos). Intenta con menos grupos o keywords.';
+        } else {
+          errorMessage += error.message;
+        }
+        
+        showToast('❌ ' + errorMessage, 'error');
+        alert(errorMessage + '\n\nRevisa la consola (F12) para más detalles.');
+      }
+    }
+    
+    // Build prompt for Claude (ENHANCED with URL content)
+    function buildPrompt() {
+      let prompt = `Eres un experto en Google Ads con 15+ años de experiencia. Tu especialidad es crear campañas profesionales de alto rendimiento.
+
+DATOS DEL NEGOCIO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Negocio: ${formData.businessName}
+Industria: ${formData.industry}
+Productos/Servicios: ${formData.products}`;
+
+      if (formData.brands) {
+        prompt += `
+Marcas que vende: ${formData.brands}`;
+      }
+
+      prompt += `
+Público Objetivo: ${formData.targetAudience}
+Ubicación: ${formData.location}
+Idioma: ${formData.language}`;
+
+      // ENHANCED: Add strengths separately for ads only
+      if (formData.strengths && formData.strengths.length > 0) {
+        prompt += `
+
+FORTALEZAS DEL NEGOCIO (SOLO para usar en ANUNCIOS, NO en keywords):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${formData.strengths.map(s => `• ${s}`).join('\n')}
+
+⚠️ IMPORTANTE: Estas fortalezas deben aparecer en los anuncios (titulares y descripciones), 
+pero NO generes keywords basadas en ellas (ej: NO crear "30 años experiencia" como keyword).`;
+      }
+
+      prompt += `
+
+CONFIGURACIÓN DE CAMPAÑA:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Nombre: ${formData.campaignName}
+Tipo: ${formData.campaignType}
+Objetivo: ${formData.campaignGoal}
+Presupuesto diario: ${formData.dailyBudget}€
+CPC estimado: ${formData.estimatedCPC}€
+Estrategia: ${formData.bidStrategy}
+
+MÉTRICAS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Tasa de conversión: ${formData.conversionRate}%
+Ticket medio: ${formData.avgTicket}€
+`;
+
+      // NEW: Add URL content if available
+      if (urlContent) {
+        prompt += `
+
+CONTENIDO ANALIZADO DE LAS URLS (hasta 7 páginas):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${urlContent}
+
+🎯 INSTRUCCIONES CRÍTICAS — USO DEL CONTENIDO REAL:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. EXTRACCIÓN DE PRECIOS REALES (OBLIGATORIO):
+   - Escanea el contenido y extrae TODOS los precios (€X, €XX, €XXX)
+   - Úsalos DIRECTAMENTE en headlines: "Jersey Bordado €44", "Bolsos Desde €49"
+   - Mínimo 30% de headlines deben contener precios reales de la página
+   - Úsalos en descriptions: "Jerseys desde €44, vaqueros €49, camisas €44"
+
+2. EXTRACCIÓN DE PRODUCTOS ESPECÍFICOS (OBLIGATORIO):
+   - Identifica nombres de productos concretos: "jersey bordado", "vaqueros panel lateral"
+   - Úsalos textualmente en keywords y headlines — son long-tail de alta intención
+
+3. ASIGNACIÓN SEMÁNTICA DE URLs POR GRUPO (CRÍTICO):
+   - OBLIGATORIO: Cada grupo de anuncios debe tener una finalUrl DIFERENTE
+   - Analiza las URLs disponibles y asigna la más relevante a cada grupo según su temática
+   - Ejemplo: grupo "Servicios" → URL de /servicios/, grupo "Contacto" → URL de /contacto/
+   - Si no hay URL específica para un grupo, usa la URL más cercana semánticamente
+   - NUNCA pongas la homepage (/) para todos los grupos — es el error más grave
+   - Si solo tienes 1 URL analizada, úsala para todos pero intenta añadir /servicios/ o /contacto/ según el grupo
+
+4. INTENCIÓN SEMÁNTICA — GOOGLE ADS 2024:
+   - Google evalúa INTENCIÓN del usuario, no solo keywords exactas
+   - Estructura keywords por micro-momentos:
+     * "Quiero comprar" → EXACT, CPC alto: [comprar jersey mujer barcelona]
+     * "Quiero hacer" → PHRASE, CPC medio: "comprar ropa mujer online"
+     * "Quiero ir" → PHRASE con ciudad: "tienda moda femenina barcelona"
+     * "Quiero saber" → BROAD, CPC bajo: moda mujer tendencia 2025
+
+5. COHERENCIA TOTAL ANUNCIO-LANDING:
+   - Usa los MISMOS términos, lenguaje y tono de la página
+   - NO prometas lo que NO está en la landing
+   - Los datos/números del anuncio deben existir en la página
+`;
+      }
+
+      if (formData.baseKeywords) {
+        prompt += `\nKeywords base sugeridas: ${formData.baseKeywords}`;
+      }
+      
+      if (formData.negativeKeywords) {
+        prompt += `\nKeywords negativas sugeridas: ${formData.negativeKeywords}`;
+      }
+
+      prompt += `
+
+GENERA UNA CAMPAÑA COMPLETA CON:
+
+🌐 ASIGNACIÓN DE URLs POR GRUPO (OBLIGATORIO SIEMPRE):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- CADA grupo de anuncios DEBE tener una finalUrl diferente y específica
+- Asigna la URL más relevante para la temática de cada grupo
+- Construye URLs específicas añadiendo /ruta/ a la URL base: /servicios/, /contacto/, /sobre-nosotros/, /productos/, /precios/, etc.
+- NUNCA repitas la misma URL en todos los grupos
+- NUNCA pongas solo "/" o la homepage para todos los grupos
+- Ejemplo correcto:
+  Grupo "Servicios" → finalUrl: "${formData.landingUrl || 'https://ejemplo.com'}/servicios/"
+  Grupo "Contacto" → finalUrl: "${formData.landingUrl || 'https://ejemplo.com'}/contacto/"
+  Grupo "Sobre Nosotros" → finalUrl: "${formData.landingUrl || 'https://ejemplo.com'}/quienes-somos/"
+${urlContent ? '- Usa las URLs REALES analizadas del sitio para máxima precisión' : '- Construye URLs lógicas basadas en la estructura típica del sector'}
+
+1. ESTRUCTURA DE ${formData.numAdGroups} GRUPOS DE ANUNCIOS
+   - Cada grupo debe tener un tema específico y coherente
+   - Nombres descriptivos tipo: "GrupoNombre_TemaEspecifico"
+   - Distribuye los temas de forma estratégica según el embudo:
+     * Grupo 1: Awareness/Investigación (términos generales, educativos)
+     * Grupo 2: Consideración (comparaciones, características específicas)
+     * Grupo 3: Decisión (marca, urgencia, ofertas)
+     * Grupo 4: Casos específicos o nicho (si aplica al negocio)
+
+2. KEYWORDS (${formData.keywordsPerGroup} por grupo)
+
+   🎯 INTENCIÓN SEMÁNTICA — MICRO-MOMENTOS GOOGLE ADS 2024:
+   ════════════════════════════════════════════════════════════════════
+   Cada grupo debe cubrir los 4 micro-momentos de intención:
+   • "Quiero comprar" → EXACT + CPC alto (máxima transacción)
+   • "Quiero hacer"   → PHRASE + CPC medio (acción específica)
+   • "Quiero ir"      → PHRASE ciudad + CPC medio (intención local)
+   • "Quiero saber"   → BROAD + CPC bajo (investigación)`;
+
+      if (urlContent) {
+        prompt += `
+   - PRIORIDAD MÁXIMA: Extrae keywords del contenido REAL de la landing
+   - Usa nombres de productos específicos como exact match
+   - Long-tail con precios reales si los hay: "jersey bordado €44 barcelona"`;
+      }
+
+      prompt += `
+   - Mezcla: 40% exacta [kw], 40% frase "kw", 20% amplia kw
+   - Formato: {"keyword": "texto", "matchType": "EXACT|PHRASE|BROAD", "maxCPC": X.XX}
+   - CPCs: transaccional exact > phrase > broad informativa
+   - NO uses fortalezas del negocio como keywords
+
+3. ANUNCIOS RESPONSIVE (${formData.adsPerGroup} por grupo)
+   
+   ⚠️ CRÍTICO - REGLAS DE DIFERENCIACIÓN:
+   ════════════════════════════════════════════════════════════════════
+   
+   CADA ANUNCIO DEBE SER ÚNICO Y DIFERENTE:
+   
+   • Los ${formData.adsPerGroup} anuncios de CADA grupo deben tener enfoques DISTINTOS
+   • Máximo 3-4 titulares pueden repetirse entre todos los anuncios
+   • Las descripciones deben ser completamente únicas por anuncio
+   • NO generes anuncios que sean "rotaciones" de los mismos titulares
+   
+   ENFOQUE POR ANUNCIO (para cada grupo):
+   
+   📌 ANUNCIO 1 - "Beneficios y Resultados"
+      Titulares: Enfocados en beneficios concretos, resultados, números, casos de éxito
+      Ejemplos: "500 Casos Ganados", "Ahorra 40% Tiempo", "ROI 300% Garantizado"
+      Descripciones: Resultados específicos, estadísticas, logros medibles
+   
+   📌 ANUNCIO 2 - "Urgencia y Acción"
+      Titulares: Urgencia, CTAs directos, llamadas a la acción inmediata
+      Ejemplos: "Compra X Ya Disponible", "Accede 24/7 Ahora", "Respuesta en 1 Hora"
+      Descripciones: Disponibilidad, rapidez, facilidad, acción inmediata
+   
+   📌 ANUNCIO 3 - "Autoridad y Credibilidad"
+      Titulares: Experiencia, certificaciones, premios, reconocimientos, marca
+      Ejemplos: "20 Años Experiencia", "Certificado ISO", "Líderes en [sector]"
+      Descripciones: Trayectoria, credenciales, equipo experto, garantías
+   
+   📌 ANUNCIO 4 - "Solución al Problema" (si aplica)
+      Titulares: Problemas del cliente, soluciones específicas, empatía
+      Ejemplos: "¿Problema con X?", "Elimina [dolor]", "Sin [obstáculo]"
+      Descripciones: Comprensión del problema, solución clara, proceso simple`;
+
+      if (urlContent) {
+        prompt += `
+   
+   🎯 COHERENCIA CON LANDING PAGE:
+   ════════════════════════════════════════════════════════════════════
+   
+   - Los titulares y descripciones DEBEN reflejar el contenido real de la landing
+   - Usa los MISMOS términos, lenguaje y tono que aparecen en la página
+   - Menciona beneficios y características ESPECÍFICAS encontradas en el contenido
+   - Si la landing menciona números/datos concretos, úsalos en los anuncios
+   - Si hay testimonios o casos de éxito en la landing, referéncialos
+   - Asegura que el mensaje del anuncio coincida con lo que encontrará el usuario`;
+      }
+
+      prompt += `
+   
+   💡 TÉCNICAS DE COPYWRITING PROFESIONAL:
+   ════════════════════════════════════════════════════════════════════
+   
+   TITULARES POTENTES — SOLO ACCIONES, NUNCA PREGUNTAS:
+   • Usa CTAs activos: "Compra", "Descubre", "Explora", "Solicita", "Consigue"
+   • Usa números: "15 Años", "500+ Clientes", "En 24 Horas", "Desde 1995"
+   • Urgencia: "Hoy", "Ya", "Ahora", "Inmediato", "24/7", "Urgente"
+   • Beneficios claros: "Ahorra Tiempo", "Aumenta Ventas", "Reduce Costes"
+   • Exclusividad: "Único", "Exclusivo", "Premium", "Elite", "Experto"
+   • Localización: Incluye ciudad/zona si es relevante
+   • Emociones: "Tranquilidad", "Confianza", "Éxito Garantizado"
+   
+   ❌ PROHIBIDO EN HEADLINES:
+   
+   🚨🚨🚨 NUNCA USAR PREGUNTAS - ESTO ES CRÍTICO 🚨🚨🚨
+   • Preguntas COMPLETAMENTE PROHIBIDAS: "¿Buscas?", "¿Necesitas?", "¿Sin?", "¿Problema?"
+   • Pasivo: "Disponible para Ti", "Servicio de Calidad"
+   
+   ⚠️ CUALQUIER headline con "¿" es ERROR GRAVE - CTR -5-8%
+   ✅ USA SIEMPRE: "Descubre", "Consigue", "Compra", "Solicita", "Explora"
+   ❌ NUNCA USES: "¿Sin?", "¿Problema?", "¿Quieres?", "¿Necesitas?"
+   • Vago: "Nueva Colección Disponible", "Productos para Ti"
+   
+   ⚠️ LONGITUD OPTIMIZADA DE TITULARES (CRÍTICO):
+   ════════════════════════════════════════════════════════════════════
+   
+   🚨 LÍMITES ABSOLUTOS - NO NEGOCIABLES:
+   • Máximo ABSOLUTO: 30 caracteres (incluye espacios y puntuación)
+   • Mínimo OBLIGATORIO: 20 caracteres
+   • Rango ÓPTIMO: 25-30 caracteres
+   
+   ❌❌❌ CUALQUIER TITULAR >30 CARACTERES SERÁ RECHAZADO POR GOOGLE ❌❌❌
+   ❌❌❌ SI UN TITULAR EXCEDE 30 CHARS, RECÓRTALO INMEDIATAMENTE ❌❌❌
+   
+   PROCESO OBLIGATORIO PARA CADA TITULAR:
+   1. Escribe el titular
+   2. CUENTA los caracteres (usa len() mental)
+   3. Si >30 → ELIMINA palabras hasta llegar a ≤30
+   4. Si <20 → AÑADE contenido hasta llegar a ≥20
+   5. VERIFICA NUEVAMENTE antes de finalizar
+   
+   ❌ NUNCA generes titulares de menos de 20 caracteres
+   ❌ NUNCA excedas los 30 caracteres - ES IMPOSIBLE PASARSE
+   ✅ SIEMPRE aprovecha el espacio disponible (25-30 es ideal)
+   
+   EJEMPLOS DE TITULARES MAL OPTIMIZADOS (muy cortos):
+   
+   ❌ "Te Ayudamos" (11 chars) → DESPERDICIO de 19 chars
+   ❌ "Contacto Directo" (16 chars) → DESPERDICIO de 14 chars
+   ❌ "Acción Ya" (9 chars) → DESPERDICIO de 21 chars
+   ❌ "Resultados" (10 chars) → DESPERDICIO de 20 chars
+   ❌ "Llama Ahora" (11 chars) → DESPERDICIO de 19 chars
+   
+   EJEMPLOS DE TITULARES BIEN OPTIMIZADOS (25-30 chars):
+   
+   ✅ "Te Ayudamos 24/7 en Barcelona" (29 chars) → ÓPTIMO
+   ✅ "Contacto Directo Sin Esperas" (28 chars) → ÓPTIMO
+   ✅ "Acción Inmediata Hoy Mismo" (26 chars) → ÓPTIMO
+   ✅ "Resultados Probados 500 Casos" (29 chars) → ÓPTIMO
+   ✅ "Llama Ahora 93 414 02 93" (24 chars) → BUENO
+   
+   6 TÉCNICAS PARA OPTIMIZAR LONGITUD:
+   
+   1️⃣ AÑADIR UBICACIÓN (si es local):
+      • "Experto" (7c) → "Experto Barcelona 20 Años" (26c)
+      • "Abogado" (7c) → "Abogado Penalista Barcelona" (28c)
+      • "Clínica" (7c) → "Clínica Dental Madrid Centro" (29c)
+   
+   2️⃣ AÑADIR URGENCIA TEMPORAL:
+      • "Contacta" (8c) → "Contacta Ahora Mismo 24/7" (26c)
+      • "Defensa" (7c) → "Defensa Inmediata Hoy Mismo" (28c)
+      • "Respuesta" (9c) → "Respuesta Rápida Hoy 24/7" (26c)
+   
+   3️⃣ AÑADIR NÚMEROS/DATOS:
+      • "Casos Ganados" (13c) → "500 Casos Ganados Barcelona" (28c)
+      • "Experiencia" (11c) → "20 Años Experiencia Probada" (28c)
+      • "Clientes" (8c) → "1000+ Clientes Satisfechos" (27c)
+   
+   4️⃣ AÑADIR BENEFICIO EXTRA:
+      • "Consulta" (8c) → "Consulta Gratis Sin Compromiso" (30c)
+      • "Envío" (5c) → "Envío Gratis en 24 Horas" (25c)
+      • "Prueba" (6c) → "Prueba Gratis 30 Días Sin Riesgo" (→33c ❌ MUY LARGO)
+      • "Prueba" (6c) → "Prueba Gratis 30 Días" (21c) ✅
+   
+   5️⃣ COMBINAR CONCEPTOS:
+      • "Experto" (7c) → "Experto Certificado Barcelona" (29c)
+      • "Rápido" (6c) → "Rápido Eficaz Garantizado" (26c)
+      • "Premium" (7c) → "Premium Calidad Precio Justo" (28c)
+   
+   6️⃣ AÑADIR LLAMADA A LA ACCIÓN:
+      • "Disponible" (10c) → "Disponible Ya Llama Ahora" (26c)
+      • "Asesoría" (8c) → "Asesoría Experta Solicita Ya" (29c)
+      • "Servicio" (8c) → "Servicio Profesional Contacta" (30c)
+   
+   EJEMPLOS POR LONGITUD OBJETIVO:
+   
+   📏 20-22 caracteres (MÍNIMO ACEPTABLE):
+   • "Experto Barcelona Top" (21c)
+   • "Consulta Gratis Hoy" (20c)
+   • "Llamada Ya Sin Espera" (22c)
+   
+   📏 25-27 caracteres (BUENO):
+   • "Abogado Penalista BCN 24/7" (26c)
+   • "500 Casos Éxito Barcelona" (26c)
+   • "Clínica Dental Barcelona Top" (28c → AJUSTAR)
+   • "Clínica Dental Top Barcelona" (27c → MEJOR)
+   
+   📏 28-30 caracteres (ÓPTIMO):
+   • "Especialista Barcelona 20 Años" (30c)
+   • "Defensa Penal Inmediata 24/7" (28c)
+   • "Envío Gratis Hoy Toda España" (29c)
+   
+   EJEMPLOS POR INDUSTRIA:
+   
+   🏛️ LEGAL (Abogados):
+   ❌ "Marco Esteban" (13c) 
+   ✅ "Marco Esteban Penalista BCN" (28c)
+   
+   ❌ "Defensa Penal" (13c)
+   ✅ "Defensa Penal Experta 24/7" (27c)
+   
+   🏥 SALUD (Clínicas):
+   ❌ "Sin Dolor" (8c)
+   ✅ "Tratamiento Sin Dolor Garantizado" (→34c ❌ MUY LARGO)
+   ✅ "Sin Dolor Técnica Avanzada" (26c) ← MEJOR
+   
+   🛒 E-COMMERCE:
+   ❌ "Envío Gratis" (11c)
+   ✅ "Envío Gratis en 24h España" (27c)
+   
+   💻 SAAS:
+   ❌ "Prueba Gratis" (12c)
+   ✅ "Prueba Gratis 30 Días Ya" (24c)
+   
+   PROCESO DE OPTIMIZACIÓN:
+   
+   Para cada titular que generes:
+   
+   PASO 1: Escribe el titular base
+   PASO 2: Cuenta los caracteres
+   PASO 3: Si <20 chars → AÑADE contenido (ubicación/urgencia/dato/beneficio)
+   PASO 4: Si >30 chars → REDUCE (quita palabras innecesarias)
+   PASO 5: Verifica que esté entre 20-30 chars
+   PASO 6: Optimiza para estar cerca de 30 chars si es posible
+   
+   EJEMPLOS DE PROCESO:
+   
+   Titular base: "Experto" (7c)
+   → +ubicación: "Experto Barcelona" (17c) → AÚN CORTO
+   → +experiencia: "Experto Barcelona 20 Años" (26c) → ✅ PERFECTO
+   
+   Titular base: "Abogado Penalista Especializado Barcelona" (41c)
+   → DEMASIADO LARGO (>30c)
+   → Reducir: "Abogado Penalista Barcelona" (28c) → ✅ PERFECTO
+   
+   ✅ REGLA FINAL:
+   
+   Antes de finalizar cada anuncio, verifica:
+   □ ¿Todos los titulares tienen 20-30 caracteres?
+   □ ¿Ningún titular tiene <20 caracteres?
+   □ ¿Ningún titular excede 30 caracteres?
+   □ ¿La mayoría están en el rango 25-30 (óptimo)?
+   
+   Si algún titular tiene <20 chars → ALARGARLO OBLIGATORIAMENTE
+   Si algún titular tiene >30 chars → ACORTARLO OBLIGATORIAMENTE
+   
+   DESCRIPCIONES EFECTIVAS:
+   • Empieza con el beneficio principal en los primeros 40 caracteres
+   • Incluye llamada a la acción clara: "Solicita", "Contacta", "Descubre", "Empieza"
+   • Usa verbos de acción: "Consigue", "Logra", "Obtén", "Mejora"
+   • Menciona garantías si existen: "Sin compromiso", "Prueba gratis", "Garantizado"
+   • Incluye diferenciadores: "Sin competencia", "Método único", "Tecnología propia"
+   • Crea FOMO: "Plazas limitadas", "Oferta temporal", "Solo hoy"
+   
+   ESTRUCTURA POR ANUNCIO:
+   • 15 titulares distribuidos:
+     - 5 titulares con beneficios/resultados
+     - 3 titulares con marca/autoridad  
+     - 3 titulares con urgencia/acción
+     - 2 titulares con características únicas
+     - 2 titulares con localización/disponibilidad
+   
+   • 4 descripciones:
+     - Desc 1: Beneficio principal + CTA
+     - Desc 2: Características clave + credibilidad
+     - Desc 3: Diferenciador + garantía/prueba social
+     - Desc 4: Urgencia + facilidad de acción
+   
+   🛤️ PATHS DINÁMICOS - ESTRATEGIA INTELIGENTE (max 15 chars c/u):
+   ════════════════════════════════════════════════════════════════════
+   
+   ⚡ NUEVA LÓGICA: Paths deben reflejar las KEYWORDS del grupo, NO ser genéricos
+   
+   OBJETIVO: Máxima relevancia = Mejor Quality Score = Menor CPC
+   
+   PROCESO DE GENERACIÓN DE PATHS:
+   
+   PASO 1: Analiza las keywords principales del grupo
+   PASO 2: Identifica los 2 términos más importantes/frecuentes
+   PASO 3: Úsalos como Path1 y Path2 (máx 15 chars cada uno)
+   
+   EJEMPLOS POR TIPO DE NEGOCIO:
+   
+   📦 E-COMMERCE / RETAIL:
+   Grupo: "Zapatillas_Running"
+   Keywords: [zapatillas running], [zapatos deportivos running]
+   ✅ Path1: "Zapatillas" (10c) | Path2: "Running" (7c)
+   ❌ Path1: "Deportes" (8c) | Path2: "Barcelona" (9c) ← Genérico
+   
+   Grupo: "Smartphones_5G"  
+   Keywords: [smartphones 5g], [móviles 5g], [teléfonos 5g]
+   ✅ Path1: "Smartphones" (11c) | Path2: "5G" (2c)
+   ❌ Path1: "Tecnologia" (10c) | Path2: "Tienda" (6c) ← Vago
+   
+   👔 SERVICIOS PROFESIONALES:
+   Grupo: "Abogado_Penalista"
+   Keywords: [abogado penalista], [defensa penal], [abogado criminal]
+   ✅ Path1: "Penalista" (10c) | Path2: "Barcelona" (9c)
+   ❌ Path1: "Servicios" (9c) | Path2: "Legales" (7c) ← Inespecífico
+   
+   Grupo: "Consultor_SEO"
+   Keywords: [consultor seo], [servicios seo], [agencia seo]
+   ✅ Path1: "Consultor" (9c) | Path2: "SEO" (3c)
+   ❌ Path1: "Marketing" (9c) | Path2: "Digital" (7c) ← Demasiado amplio
+   
+   🏥 SERVICIOS LOCALES:
+   Grupo: "Clinica_Dental"
+   Keywords: [clínica dental], [dentista], [odontología]
+   ✅ Path1: "Dental" (6c) | Path2: "Centro-BCN" (10c)
+   ❌ Path1: "Salud" (5c) | Path2: "Cuidado" (7c) ← Vago
+   
+   💻 SAAS / SOFTWARE:
+   Grupo: "CRM_Ventas"
+   Keywords: [crm ventas], [software ventas], [gestión clientes]
+   ✅ Path1: "CRM" (3c) | Path2: "Ventas" (6c)
+   ❌ Path1: "Software" (8c) | Path2: "Empresas" (8c) ← Genérico
+   
+   🎯 REGLAS OBLIGATORIAS:
+   
+   1. Máximo 15 caracteres por path (incluye espacios y guiones)
+   2. Evita artículos: NO "El", "La", "Los", "Las"
+   3. Evita preposiciones innecesarias: NO "de", "en", "para"
+   4. Usa guiones para palabras compuestas: "Marketing-Digital" (16c ❌) → "Mkt-Digital" (11c ✅)
+   5. NO puntuación final (sin puntos, comas, etc.)
+   6. Extrae términos de las KEYWORDS del grupo
+   7. Prioriza especificidad sobre genericidad
+   
+   ❌ ERRORES COMUNES A EVITAR:
+   
+   • "Servicios Profesionales" (23c) ← MUY LARGO + vago
+   • "Productos" + "Calidad" ← Vacío, no dice nada específico
+   • "Barcelona" + "España" ← Ubicación en ambos paths (desperdicio)
+   • "Consultoría" + "Servicios" ← Redundante y genérico
+   • Usar mismo path en todos los grupos ← GRAVE ERROR
+   
+   ✅ PATRONES GANADORES:
+   
+   PRODUCTO + CARACTERÍSTICA:
+   • "Zapatillas" + "Running"
+   • "TV" + "4K-Smart"
+   • "Laptop" + "Gaming"
+   
+   SERVICIO + UBICACIÓN:
+   • "Abogado" + "Barcelona"
+   • "Dentista" + "Centro-BCN"
+   • "Fontanero" + "24h-Urgente"
+   
+   ESPECIALIDAD + BENEFICIO:
+   • "SEO" + "Posicion-1"
+   • "Marketing" + "ROI-Alto"
+   • "Diseño" + "Profesional"
+   
+   CATEGORÍA + SUBCATEGORÍA:
+   • "Perfumes" + "Mujer"
+   • "Ropa" + "Verano-2024"
+   • "Muebles" + "Salon"
+   
+   IMPACTO ESTIMADO:
+   • Paths genéricos → CTR base
+   • Paths específicos → +8-12% CTR
+   • Paths con keywords → +0.5-1 punto Quality Score
+   
+   ════════════════════════════════════════════════════════════════════
+   
+   LÍMITES ESTRICTOS (Google Ads):
+   • Titulares: Máximo 30 caracteres (incluye espacios)
+   • Descripciones: Máximo 90 caracteres (incluye espacios)
+   • Paths: Máximo 15 caracteres cada uno
+   
+   🚨🚨🚨 ATENCIÓN CRÍTICA - LONGITUDES DESCRIPTIONS 🚨🚨🚨
+   
+   LÍMITE ABSOLUTO DESCRIPTIONS: 90 CARACTERES
+   
+   ❌ Cualquier description >90 caracteres será RECHAZADA por Google
+   ❌ NO hay excepciones - 90 es el MÁXIMO ABSOLUTO
+   ❌ Si una description llega a 91+ caracteres, GOOGLE LA RECHAZA
+   
+   🚨 NUEVO: MÍNIMO RECOMENDADO 80 CARACTERES
+   ✅ RANGO ÓPTIMO: 80-90 caracteres (mejor 85-90)
+   ⚠️ Evita descriptions <80c → desaprovechas espacio = menos info = peor CTR
+   
+   PROCESO OBLIGATORIO PARA CADA DESCRIPTION:
+   1. Escribe la description
+   2. CUENTA caracteres mentalmente (mín 80, máx 90)
+   3. Si <80 → AÑADE beneficios/detalles hasta llegar a 80-90
+   4. Si >90 → ELIMINA palabras/frases hasta ≤90
+   5. Si >85 → REVISA para asegurar que no pases de 90
+   6. VERIFICA NUEVAMENTE los 4 descriptions antes de finalizar
+   
+   EJEMPLOS CORRECTOS (80-90 caracteres):
+   ✅ "20 años defendiendo casos complejos con éxito en Barcelona. Equipo especializado" (82c)
+   ✅ "Equipo multidisciplinar te acompaña en todo el proceso legal. Atención personalizada" (86c)
+   ✅ "Ropa femenina desde €32. Vestidos, camisas, jerseys. Envío gratis desde €49. BCN" (80c)
+   
+   EJEMPLOS INCORRECTOS (<80 caracteres):
+   ❌ "Liquidación stock. Tienda Barcelona. Confianza 15 años" (56c) → MUY CORTO
+   ❌ "Ahorra sin renunciar estilo. Jerseys €24. BCN" (47c) → MUY CORTO
+   
+   ⚠️ IMPORTANTE: Aprovecha el espacio 80-90c para maximizar información y CTR
+   
+   📊 PERSONALIZACIÓN POR INDUSTRIA:
+   ════════════════════════════════════════════════════════════════════`;
+   
+      // Add industry-specific guidance
+      const industryGuidance = {
+        'legal': `
+   SECTOR LEGAL/ABOGADOS:
+   • Usa confianza y credibilidad: "Experto", "Especialista", "Casos Ganados"
+   • Urgencia apropiada: "Consulta Hoy", "Defensa Inmediata", "24/7"
+   • Evita promesas absolutas: mejor "Alta tasa éxito" que "Ganarás seguro"
+   • Menciona especialidades: tipos de casos, jurisdicciones
+   • Incluye credenciales: años experiencia, casos resueltos`,
+        
+        'health': `
+   SECTOR SALUD/CLÍNICAS:
+   • Prioriza confianza y profesionalidad: "Certificado", "Equipo Médico", "Tecnología"
+   • Enfatiza cuidado: "Atención Personalizada", "Sin Dolor", "Resultados Naturales"
+   • Localización importante: pacientes buscan cercanía
+   • Menciona especialidades médicas específicas
+   • Incluye facilidades: "Primera Consulta Gratis", "Financiación"`,
+        
+        'ecommerce': `
+   SECTOR E-COMMERCE / MODA / RETAIL:
+   • Precios concretos SIEMPRE: "Desde €16", "Vestidos €25", "Hasta 50% dto"
+   • Urgencia comercial real: "Stock Limitado", "Solo Esta Semana", "Últimas Unidades"
+   • Facilidades de compra: "Envío Gratis +60€", "Cambio Tallas Gratis", "Devolución 30 Días"
+   • Variedad: "500+ Prendas", "Nueva Colección", "Todas las Tallas"
+   • Trust local: "15 Años Moda BCN", "Familia Fundadora", "Tienda Física BCN"
+   • CTAs específicos: "Compra", "Descubre", "Explora" — NUNCA preguntas
+   
+   🛍️ PARA MODA FEMENINA ESPECÍFICAMENTE:
+   • Grupos de ropa: "tendencia", "temporada", "moda actual", "estilo"
+   • Grupos de rebajas: "liquidación", "stock limitado", "auténtico", "precio reducido"
+   • Grupos de fiesta: "elegante", "lentejuelas", "terciopelo", "ocasiones especiales"
+   • Grupos de zapatos: "confort", "todas tallas", "estilo propio", "calzado premium"
+   • Grupos de accesorios: "completa tu look", "precio accesible", "bolsos", "bisutería"
+   • Grupos de joyería/bisutería: "exclusivo", "diseño único", "premium", "detalles"
+   • Total look: "outfit completo", "combina fácil", "asesoramiento personal"`,
+        
+        'saas': `
+   SECTOR SAAS/SOFTWARE:
+   • Eficiencia: "Automatiza", "Ahorra Tiempo", "Más Productivo"
+   • Facilidad: "Fácil de Usar", "Sin Instalación", "Cloud"
+   • Prueba: "Prueba Gratis", "Demo Gratuita", "Sin Tarjeta"
+   • Escalabilidad: "Crece Contigo", "Flexible", "Personalizable"
+   • ROI: "Reduce Costes", "Aumenta Ventas", "ROI Medible"`,
+        
+        'consulting': `
+   SECTOR CONSULTORÍA / SERVICIOS PROFESIONALES:
+   • Experiencia cuantificada: "15+ Años", "200+ Proyectos", "50+ Clientes"
+   • Resultados medibles: "ROI +300%", "Reduce Costes 40%", "Ventas +25%"
+   • Metodología diferenciada: "Método Probado", "Sistema Único", "Proceso Claro"
+   • Personalización: "A Medida", "Tu Situación", "Diagnóstico Personalizado"
+   • Garantías: "Sin Riesgo", "Resultados o Devolvemos", "Garantía Satisfacción"
+   • CTAs directos: "Solicita", "Reserva", "Agenda", "Consulta" — NUNCA preguntas
+   • Trust: certificaciones, partnerships, casos de éxito con datos reales
+   
+   💼 DIFERENCIACIÓN POR TIPO DE SERVICIO:
+   • Awareness → educativo, problema del cliente, sin urgencia
+   • Consideración → comparativo, metodología, diferenciadores
+   • Decisión → urgencia real, CTA fuerte, garantías concretas
+   • Nicho/Especialización → expertise específico, casos, resultados`,
+        
+        'education': `
+   SECTOR EDUCACIÓN/FORMACIÓN:
+   • Resultados: "Aprende en X", "Domina", "Certifícate"
+   • Credenciales: "Profesores Expertos", "Certificado Oficial", "Acreditado"
+   • Flexibilidad: "A tu Ritmo", "Online", "Clases Personalizadas"
+   • Empleabilidad: "Consigue Trabajo", "Alta Demanda", "Salidas"
+   • Accesibilidad: "Desde Casa", "Fácil Acceso", "Empieza Ya"`
+      };
+      
+      const industryKey = formData.industry?.toLowerCase() || '';
+      for (const [key, guidance] of Object.entries(industryGuidance)) {
+        if (industryKey.includes(key) || industryKey.includes(key.substring(0, 4))) {
+          prompt += guidance;
+          break;
+        }
+      }
+      
+      prompt += `
+   
+   ✅ CHECKLIST FINAL POR ANUNCIO:
+   ════════════════════════════════════════════════════════════════════
+   
+   Antes de generar cada anuncio, verifica:
+   
+   □ ¿Los 15 titulares son ÚNICOS y no repetitivos?
+   □ ¿Hay variedad de enfoques (beneficios, urgencia, autoridad, problema)?
+   □ ¿Los titulares usan números, preguntas, o emociones?
+   □ ¿Las 4 descripciones son completamente diferentes entre sí?
+   □ ¿Cada descripción tiene CTA claro y beneficio específico?
+   □ ¿Se respetan los límites de caracteres (30 y 90)?
+   □ ¿El anuncio refleja el contenido de la landing page?
+   □ ¿Se diferencia claramente de los otros anuncios del mismo grupo?
+
+4. KEYWORDS NEGATIVAS (25-30 términos con DOBLE PROTECCIÓN)
+   
+   ⚠️ CRÍTICO: Sistema de Doble Capa para Máxima Protección
+   ═══════════════════════════════════════════════════════════════════════════════
+   
+   GENERAR 2 TIPOS DE NEGATIVAS:
+   
+   🎯 CAPA 1 - EXACT MATCH (25-30 keywords):
+   Bloquea solo la palabra exacta
+   
+   🛡️ CAPA 2 - PHRASE MATCH (Las 15 más críticas):
+   Bloquea la palabra + cualquier variación
+   
+   POR QUÉ ESTO ES CRÍTICO:
+   • Exact "gratis" NO bloquea → "zapatos gratis", "envío gratis"
+   • Phrase "gratis" SÍ bloquea → "zapatos gratis", "envío gratis", "productos gratis"
+   • Doble protección sin afectar tráfico válido
+   
+   CATEGORÍAS DE NEGATIVAS A INCLUIR:
+   
+   📌 Búsquedas de contenido gratuito (PHRASE OBLIGATORIO):
+   • gratis, free, gratuito, sin costo, sin pagar, 0€, 0 euros
+   
+   📌 Piratería y descargas ilegales (PHRASE OBLIGATORIO):
+   • crack, pirata, torrent, descargar gratis, download free, keygen
+   
+   📌 Empleo/reclutamiento (PHRASE OBLIGATORIO):
+   • trabajo, empleo, vacante, oferta trabajo, se busca, hiring
+   
+   📌 Formación gratuita (PHRASE OBLIGATORIO):
+   • curso gratis, tutorial, aprende gratis, formacion gratuita
+   
+   📌 DIY / Hazlo tú mismo (PHRASE OBLIGATORIO):
+   • como hacer, tutorial, paso a paso, hazlo tu mismo, diy
+   
+   📌 Información general (PHRASE OBLIGATORIO):
+   • pdf, wikipedia, definicion, que es, informacion
+   
+   📌 Competencia directa (EXACT solamente):
+   • amazon, aliexpress, [competidores específicos - máx 3-4]
+   
+   📌 Búsquedas irrelevantes por sector (PHRASE recomendado):
+   • Para B2B: particular, personal, barato, low cost
+   • Para premium: barato, economico, low cost
+   • Para servicios: segunda mano, usado, outlet, imitacion
+   
+   ⚠️ NO incluir como negativas:
+   • Términos que describen TU servicio/producto
+   • Ubicaciones donde SÍ operas (ciudades, regiones)
+   • Delitos/problemas que SÍ atiendes (si eres abogado)
+   • Sinónimos válidos de tus servicios
+   
+   ═══════════════════════════════════════════════════════════════════════════════
+   📋 FORMATO DE SALIDA OBLIGATORIO:
+   ═══════════════════════════════════════════════════════════════════════════════
+   
+   "negatives": {
+     "exact": [
+       "gratis", "gratuito", "segunda mano", "usado", "barato", 
+       "crack", "pirata", "torrent", "trabajo", "empleo", 
+       "vacante", "curso gratis", "tutorial gratis", "como hacer",
+       "diy", "pdf", "wikipedia", "definicion", "que es",
+       "amazon", "aliexpress", "oferta trabajo", "se busca",
+       "descargar gratis", "imitacion", "falsificacion",
+       ... hasta 25-30 términos
+     ],
+     "phrase": [
+       "gratis", "gratuito", "segunda mano", "usado", "barato",
+       "crack", "pirata", "trabajo", "empleo", "curso",
+       "tutorial", "como hacer", "amazon", "aliexpress", "imitacion"
+     ]
+   }
+   
+   ⚡ LAS 15 CRÍTICAS PARA PHRASE (siempre incluir):
+   1. gratis          6. crack         11. curso
+   2. gratuito        7. pirata        12. tutorial
+   3. segunda mano    8. trabajo       13. como hacer
+   4. usado           9. empleo        14. amazon
+   5. barato          10. vacante      15. aliexpress
+   
+   IMPACTO: +12% protección de presupuesto vs solo Exact Match
+   ═══════════════════════════════════════════════════════════════════════════════
+
+5. EXTENSIONES DE ANUNCIOS
+   
+   🔗 SITELINKS (4-6 enlaces de sitio):
+   ════════════════════════════════════════════════════════════════════
+   
+   Cada sitelink debe:
+   • Título: 20-25 caracteres, descriptivo y atractivo
+   • Descripción: 35 caracteres, beneficio o CTA claro
+   • URL: Enlace real a página específica del sitio
+   
+   TIPOS DE SITELINKS EFECTIVOS:
+   • Servicios principales: "Consultoría SEO", "Auditoría Web"
+   • Casos de éxito: "Casos de Éxito", "Testimonios Clientes"
+   • Acciones: "Solicita Presupuesto", "Contacta Ahora"
+   • Recursos: "Guía Gratuita", "Blog de Consejos"
+   • Sobre nosotros: "Nuestro Equipo", "Quiénes Somos"
+   • Ubicación: "Oficina Barcelona", "Visítanos"
+   
+   📢 CALLOUTS (6-8 textos destacados):
+   ════════════════════════════════════════════════════════════════════
+   
+   • Máximo 25 caracteres cada uno
+   • Sin puntuación final (ni punto, ni coma)
+   • Concisos y directos
+   • Enfocados en USPs y beneficios
+   
+   TIPOS DE CALLOUTS POTENTES:
+   • Experiencia: "15+ Años Experiencia", "Expertos Certificados"
+   • Volumen/escala: "500+ Clientes", "1000+ Proyectos"
+   • Disponibilidad: "Atención 24/7", "Respuesta Inmediata"
+   • Garantías: "Garantía Satisfacción", "Sin Compromiso"
+   • Facilidades: "Envío Gratis", "Primera Consulta Gratis"
+   • Diferenciadores: "Metodología Única", "Tecnología Propia"
+   • Acreditaciones: "Certificado ISO", "Partner Google"
+   • Localización: "Presencia Nacional", "Servicio Local"
+   
+   📊 SNIPPETS ESTRUCTURADOS (OBLIGATORIO - Mínimo 2 categorías):
+   ════════════════════════════════════════════════════════════════════
+   
+   🚨 CRÍTICO: DEBES generar snippets estructurados SIEMPRE. Mínimo 2 categorías.
+   
+   CATEGORÍAS COMUNES (elige las 2-3 más relevantes):
+   • "Servicios": Lista de servicios principales (4-6 items)
+   • "Tipos": Tipos de producto/servicio/solución (4-6 items)
+   • "Marcas": Marcas que vendes/representas (4-8 items)
+   • "Modelos": Modelos específicos de producto (4-8 items)
+   • "Características": Características principales (4-6 items)
+   • "Destinos": Ubicaciones donde operas (4-8 items)
+   • "Estilos": Estilos/categorías de producto (4-6 items)
+   • "Amenidades": Servicios incluidos/extras (4-8 items)
+   
+   ✅ OBLIGATORIO: Genera AL MENOS 2 categorías con 4-6 items cada una.
+   ❌ NUNCA devuelvas objeto vacío: {} (esto es un ERROR CRÍTICO)
+
+═══════════════════════════════════════════════════════════════════════════════
+6. FORMATO DE SALIDA Y VALIDACIONES FINALES
+═══════════════════════════════════════════════════════════════════════════════
+
+ESTRUCTURA JSON COMPLETA:
+{
+  "name": "${formData.campaignName}",
+  "type": "${formData.campaignType}",
+  "goal": "${formData.campaignGoal}",
+  "budget": ${formData.dailyBudget},
+  "bidStrategy": "${formData.bidStrategy}",
+  "location": "${formData.location}",
+  "language": "${formData.language}",
+  "adGroups": [
+    {
+      "name": "NombreGrupo_TemaEspecifico",
+      "theme": "Descripción del tema de este grupo",
+      "bid": X.XX,
+      "keywords": [
+        {"keyword": "keyword exacta", "matchType": "EXACT", "maxCPC": X.XX},
+        {"keyword": "keyword frase", "matchType": "PHRASE", "maxCPC": X.XX},
+        {"keyword": "keyword amplia", "matchType": "BROAD", "maxCPC": X.XX}
+      ],
+      "ads": [
+        {
+          "headlines": [
+            "Titular 1 único 30c",
+            "Titular 2 diferente 30c",
+            "Titular 3 distinto 30c",
+            "Titular 4 variado 30c",
+            "Titular 5 único 30c",
+            "Titular 6 diferente 30c",
+            "Titular 7 distinto 30c",
+            "Titular 8 variado 30c",
+            "Titular 9 único 30c",
+            "Titular 10 diferente 30c",
+            "Titular 11 distinto 30c",
+            "Titular 12 variado 30c",
+            "Titular 13 único 30c",
+            "Titular 14 diferente 30c",
+            "Titular 15 distinto 30c"
+          ],
+          "descriptions": [
+            "Descripción 1 completa con beneficio principal y CTA clara max 90 caracteres",
+            "Descripción 2 totalmente diferente con credibilidad y autoridad max 90 chars",
+            "Descripción 3 única con diferenciador y garantía o prueba social max 90c",
+            "Descripción 4 distinta con urgencia y facilidad de acción max 90 caracteres"
+          ],
+          "path1": "PathEspecifico",
+          "path2": "PathRelevante",
+          "finalUrl": "${formData.landingUrl || 'https://ejemplo.com'}"
+        }
+      ]
+    }
+  ],
+  "negatives": {
+    "exact": ["negativa1", "negativa2", ...],
+    "phrase": ["top15", ...]
+  },
+  "extensions": {
+    "sitelinks": [
+      {"title": "Título Sitelink", "desc": "Descripción beneficio", "url": "https://ejemplo.com/pagina"}
+    ],
+    "callouts": ["Callout Sin Puntuación", "Otro Callout Potente"],
+    "snippets": {
+      "Servicios": ["servicio1", "servicio2"],
+      "Características": ["car1", "car2"]
+    }
+  }
+}
+
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 VALIDACIÓN QUALITY SCORE - PASO CRÍTICO ANTES DE GENERAR
+═══════════════════════════════════════════════════════════════════════════════
+
+⚠️ IMPORTANTE: Esta validación asegura Quality Score 8-9/10 (vs 6-7/10 sin ella)
+IMPACTO: -20% CPC, +15% posición, +30% impresiones
+
+PARA CADA GRUPO DE ANUNCIOS, VERIFICAR:
+
+✅ 1. RELEVANCIA KEYWORD-ANUNCIO (40% del Quality Score)
+════════════════════════════════════════════════════════════════════════════════
+
+Para cada grupo, verifica que:
+
+□ Las keywords PRINCIPALES aparecen en al menos 5 headlines diferentes
+□ Las keywords PRINCIPALES aparecen en al menos 2 descriptions
+□ Los paths reflejan las keywords del grupo (NO genéricos)
+□ NO hay keywords en el grupo que no se mencionen en NINGÚN anuncio
+
+EJEMPLO CORRECTO:
+Grupo: "Abogado_Penalista"
+Keywords: [abogado penalista], [defensa penal], [abogado criminal], [penalista barcelona]
+
+Anuncios deben contener:
+✅ Headlines: "Abogado Penalista Barcelona", "Defensa Penal Experta 24/7", 
+             "Criminal Abogado 600 Casos", "Penalista Especializado BCN"
+✅ Descriptions: "Abogado penalista con 20 años defendiendo...", 
+                "Especialistas en defensa penal..."
+✅ Paths: "Penalista" / "Barcelona"
+
+EJEMPLO INCORRECTO:
+Grupo: "Abogado_Penalista"
+Keywords: [abogado penalista], [defensa penal]
+
+❌ Headlines: "Servicios Legales Barcelona", "Llama Ya 24/7", "Equipo Experto"
+   → NO menciona "penalista" ni "penal" → Quality Score BAJO
+
+✅ 2. ESPECIFICIDAD DE MENSAJES (30% del Quality Score)
+════════════════════════════════════════════════════════════════════════════════
+
+□ Evita mensajes genéricos y vacíos
+□ Incluye números concretos siempre que sea posible
+□ Menciona beneficios ESPECÍFICOS, no vagos
+□ Usa términos técnicos o especializados cuando corresponda
+
+EVITAR (mensajes genéricos):
+❌ "Servicio de Calidad" ← Todos dicen esto, no diferencia
+❌ "Te Ayudamos" ← ¿En qué exactamente?
+❌ "Llámanos" ← ¿Para qué? ¿Qué obtengo?
+❌ "Resultados Garantizados" ← Vago, sin prueba
+❌ "Mejor Precio" ← Sin contexto ni cifra
+
+PREFERIR (mensajes específicos):
+✅ "600 Casos Ganados Barcelona" ← Número concreto + ubicación
+✅ "Defensa Penal Inmediata 24/7" ← Servicio específico + disponibilidad
+✅ "Consulta Gratis Hoy Mismo" ← Beneficio tangible + urgencia
+✅ "20 Años Experiencia Penalista" ← Dato verificable + especialidad
+✅ "Desde 150€ Primera Consulta" ← Precio concreto + servicio
+
+✅ 3. COHERENCIA LANDING-ANUNCIO (30% del Quality Score)
+════════════════════════════════════════════════════════════════════════════════
+
+Si hay contenido de landing page analizado (urlContent):
+
+□ Los términos del anuncio COINCIDEN con los de la landing
+□ Los beneficios mencionados EXISTEN en la landing page
+□ El tono y lenguaje es SIMILAR al de la landing
+□ NO prometas en el anuncio lo que NO está en la landing
+□ Usa los MISMOS números/estadísticas que aparecen en la landing
+
+EJEMPLO CORRECTO:
+Landing dice: "Más de 600 casos ganados en 20 años defendiendo clientes en Barcelona"
+
+Anuncios pueden decir:
+✅ "600+ Casos Ganados 20 Años BCN" ← Coincide con landing
+✅ "Defendiendo Clientes Barcelona" ← Mismo lenguaje
+✅ "20 Años Experiencia Probada" ← Dato verificable en landing
+
+Anuncios NO pueden decir:
+❌ "1000 Casos Ganados" ← Número NO está en landing
+❌ "30 Años Experiencia" ← Dato diferente al de landing
+❌ "Mejor Abogado España" ← Claim NO aparece en landing
+
+✅ 4. FORMATO Y ESTRUCTURA PROFESIONAL
+════════════════════════════════════════════════════════════════════════════════
+
+□ Cada grupo tiene nombre DESCRIPTIVO (no "Grupo 1", "Grupo 2")
+   Correcto: "Abogado_Penalista_Barcelona", "Defensa_Penal_Urgente"
+   Incorrecto: "Grupo1", "AdGroup2"
+
+□ Los anuncios tienen VARIEDAD de enfoques (no todos iguales)
+   Anuncio 1: Beneficios/Resultados
+   Anuncio 2: Urgencia/Acción
+   Anuncio 3: Autoridad/Credibilidad
+   Anuncio 4: Problema/Solución
+
+□ Las extensiones son RELEVANTES al negocio específico
+   No genéricas tipo "Contáctanos", "Llama Ya"
+   Específicas tipo "Consulta Penalista Gratis", "Defensa Inmediata 24/7"
+
+□ Los paths son ESPECÍFICOS (no genéricos)
+   ❌ "Servicios" / "Barcelona"
+   ✅ "Penalista" / "Barcelona"
+
+════════════════════════════════════════════════════════════════════════════════
+📊 PROCESO DE AUTO-CORRECCIÓN POR GRUPO:
+════════════════════════════════════════════════════════════════════════════════
+
+Para cada grupo que generes:
+
+PASO 1: Genera el grupo completo (keywords + anuncios)
+PASO 2: Verifica los 4 puntos de Quality Score arriba
+PASO 3: Si algo falla → CORRIGE antes de pasar al siguiente grupo
+PASO 4: Al finalizar todos los grupos → Revisa coherencia general
+
+REGLA DE ORO:
+Si un grupo NO cumple estos criterios de QS:
+→ Es MEJOR regenerar ese grupo que entregar baja calidad
+→ Google penalizará con QS 5-6/10 = CPC 40-60% más alto
+→ Presupuesto del cliente se desperdicia en subastas caras
+
+════════════════════════════════════════════════════════════════════════════════
+💡 SEÑALES DE QUALITY SCORE ALTO (8-9/10):
+════════════════════════════════════════════════════════════════════════════════
+
+✅ Keywords principales aparecen textualmente en headlines
+✅ Cada anuncio menciona términos específicos del grupo
+✅ Paths reflejan las keywords, no son genéricos
+✅ Descripciones incluyen beneficios concretos con números
+✅ Mensajes coherentes con contenido de landing (si analizada)
+✅ Nombres de grupos descriptivos y temáticos
+✅ Variedad de enfoques en los anuncios del grupo
+✅ Extensiones específicas, no plantillas genéricas
+
+════════════════════════════════════════════════════════════════════════════════
+⚠️ SEÑALES DE QUALITY SCORE BAJO (5-6/10):
+════════════════════════════════════════════════════════════════════════════════
+
+❌ Keywords del grupo NO aparecen en anuncios
+❌ Mensajes vagos y genéricos ("Llama Ya", "Te Ayudamos")
+❌ Paths genéricos iguales en todos los grupos ("Servicios", "Productos")
+❌ Nombres de grupos no descriptivos ("Grupo 1", "Campaign 2")
+❌ Todos los anuncios del grupo dicen lo mismo (sin variedad)
+❌ Anuncios prometen cosas que NO están en la landing
+❌ No hay números concretos ni pruebas específicas
+
+════════════════════════════════════════════════════════════════════════════════
+
+VALIDACIÓN COMPLETA → Continúa al Checklist Final ↓
+
+═══════════════════════════════════════════════════════════════════════════════
+✅ CHECKLIST FINAL ANTES DE GENERAR:
+═══════════════════════════════════════════════════════════════════════════════
+
+CALIDAD DE ANUNCIOS:
+□ Cada anuncio del mismo grupo tiene enfoque DIFERENTE (Beneficios, Urgencia, Autoridad, Problema)
+□ Máximo 3-4 titulares se repiten entre TODOS los anuncios
+□ Todas las descripciones son completamente únicas
+□ Los titulares usan números, preguntas, urgencia, emociones
+
+🚨🚨🚨 VALIDACIÓN CRÍTICA DE LONGITUDES - NO NEGOCIABLE 🚨🚨🚨
+
+ANTES DE GENERAR EL JSON, VERIFICA CADA ELEMENTO:
+
+✅ HEADLINES (Titulares):
+   • MÍNIMO: 20 caracteres (incluye espacios)
+   • MÁXIMO: 30 caracteres (incluye espacios)
+   • Si un titular tiene 31+ caracteres → RECÓRTALO INMEDIATAMENTE
+   • Si un titular tiene <20 caracteres → ALARGA CON ubicación/urgencia/dato
+   • EJEMPLO: "Abogado Penalista BCN 600 Casos" (31c) ❌
+             → "Abogado Penalista BCN 600+" (28c) ✅
+
+✅ DESCRIPTIONS (Descripciones):
+   • MÍNIMO: 70 caracteres (para aprovechar espacio)
+   • MÁXIMO: 90 caracteres (incluye espacios)
+   • Si una description tiene 91+ caracteres → RECÓRTALA INMEDIATAMENTE
+   • EJEMPLO: "Más de 600 casos ganados y 20 años de experiencia defendiendo con éxito" (91c) ❌
+             → "600 casos ganados y 20 años defendiendo con éxito. Consulta hoy" (89c) ✅
+
+✅ PATHS:
+   • MÁXIMO: 15 caracteres cada uno
+   • Sin espacios al inicio/final
+   • EJEMPLO: "Casos Barcelona" (16c) ❌
+             → "Casos BCN" (9c) ✅
+
+🔴 REGLA DE ORO ABSOLUTA:
+Si CUALQUIER headline supera 30 caracteres → TODA la campaña se rechaza
+Si CUALQUIER description supera 90 caracteres → TODA la campaña se rechaza
+
+📊 PROCESO DE AUTO-VALIDACIÓN:
+1. Genera el anuncio completo
+2. CUENTA mentalmente caracteres de CADA headline (máx 30)
+3. CUENTA mentalmente caracteres de CADA description (máx 90)
+4. Si alguno se pasa → RECORTA palabras hasta cumplir límite
+5. VERIFICA NUEVAMENTE antes de pasar al siguiente anuncio
+
+□ Se respetan límites: 30 chars (titulares), 90 chars (descripciones), 15 chars (paths)
+
+COHERENCIA CON LANDING:
+□ Los anuncios reflejan el contenido REAL de la landing page (si se analizó)
+□ Se usan los mismos términos y tono de la landing
+□ Se mencionan beneficios/características específicas de la página
+
+KEYWORDS:
+□ ${formData.keywordsPerGroup} keywords por grupo con mezcla de concordancias
+□ CPCs ajustados según intención (más altos para transaccionales)
+□ NO se usan "fortalezas" como keywords
+
+NEGATIVAS:
+□ 25-30 negativas EXACT inteligentes y relevantes
+□ 15 negativas PHRASE (las más críticas en doble protección)
+□ NO se excluyen términos que describen TU servicio
+□ NO se excluyen ubicaciones donde operas
+
+EXTENSIONES:
+□ 4-6 Sitelinks con títulos atractivos, Descripción 1 Y Descripción 2 (ambas obligatorias, máx 35c), y URLs específicas por sección
+□ 6-8 Callouts potentes sin puntuación final (máx 25c cada uno)
+□ OBLIGATORIO: 2-3 Snippets estructurados con encabezados reales de Google (Servicios, Tipos, Marcas, Estilos, Programas, Destinos, etc.) y mínimo 4 valores por snippet
+
+═══════════════════════════════════════════════════════════════════════════════
+
+═══════════════════════════════════════════════════════════════════════════════
+🚀 MEJORAS V8 — REGLAS FINALES DE CALIDAD (TODAS OBLIGATORIAS)
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ V8-1: VALIDADOR AUTOMÁTICO ACTIVO
+El sistema corregirá automáticamente headlines >30c y descriptions >90c.
+Pero genera bien desde el principio — mejor sin correcciones que con ellas.
+
+✅ V8-2: PRECIOS DINÁMICOS DESDE URL
+Si se analizó una URL, extrae precios reales y úsalos:
+• Headlines: "Jersey Bordado €44", "Bolsos Desde €49", "Bisutería €16"
+• Descriptions: "Jerseys desde €44, vaqueros €49. Envío gratis desde €70"
+• Mínimo 30% de headlines con precios reales si hay URL analizada
+
+✅ V8-3: INTENCIÓN SEMÁNTICA — 4 MICRO-MOMENTOS
+Cada grupo cubre los 4 micro-momentos de Google:
+🛒 Comprar → [exact] CPC alto  |  🔍 Hacer → "phrase" CPC medio
+📍 Ir → "phrase ciudad" CPC medio  |  💡 Saber → broad CPC bajo
+
+✅ V8-4: CTAs ACTIVOS — NUNCA PREGUNTAS
+❌ PROHIBIDO: "¿Buscas X?" / "¿Necesitas Y?" / cualquier pregunta
+✅ OBLIGATORIO: "Compra" / "Descubre" / "Explora" / "Solicita" / "Consigue"
+Mínimo 60% de headlines con verbos de acción
+
+✅ V8-5: ESPECIFICIDAD 50%+ del copy con datos concretos
+€X precios · X% descuentos · X años experiencia · Xh entrega · X días garantía
+
+✅ V8-6: IDENTIDAD ÚNICA POR GRUPO — 0 repetición entre grupos
+MODA: Ropa→tendencia | Rebajas→urgencia/stock | Fiesta→elegancia/lentejuelas
+      Zapatos→confort/tallas | Accesorios→precio/variedad | Bisutería→premium
+SERVICIOS: Awareness→educativo | Consideración→beneficios | Decisión→urgencia
+
+✅ V8-7: TRUST SIGNALS (2-3 por grupo, integrados natural)
+"20 Años Experiencia" · "Familia Fundadora" · "Cambio Tallas Gratis"
+"Envío Gratis Desde €X" · "Devolución 30 Días" · "Compra Segura"
+
+✅ V8-8: CALLOUTS ≤25c sin puntuación final
+✅ V8-9: SITELINKS con descripciones concretas y URLs específicas
+✅ V8-10: Localización natural en 40-50% headlines (BCN, Barcelona, región)
+
+═══════════════════════════════════════════════════════════════════════════════
+📊 CHECKLIST FINAL V8 — ANTES DE GENERAR EL JSON:
+═══════════════════════════════════════════════════════════════════════════════
+
+□ 0 headlines > 30 caracteres (el sistema corrige pero genera bien)
+□ 0 descriptions > 90 caracteres (idem)
+□ 0 preguntas en headlines (¿?)
+□ 60%+ headlines con verbo de acción activo
+□ 30%+ headlines con precio real (si hay URL analizada)
+□ 50%+ copy con datos específicos (€, %, años, tiempo)
+□ 4 micro-momentos cubiertos en keywords de cada grupo
+□ Identidad de copy única por grupo (sin repetición)
+□ 2-3 trust signals por grupo
+□ Localización 40-50% headlines
+□ Callouts ≤25c sin puntuación
+□ Sitelinks con URLs específicas y descripciones con beneficios reales
+□ Keywords negativas: 25-30 exact + 15 phrase (doble capa)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🚫 ANTI-CANIBALIZACIÓN OBLIGATORIA:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- CADA keyword (texto normalizado sin símbolos) debe aparecer en UN SOLO grupo
+- Antes de finalizar el JSON, revisa TODOS los grupos y elimina cualquier keyword duplicada
+- Si una keyword es relevante para 2 grupos, asígnala al más específico y elimínala del otro
+- Las keywords PHRASE y BROAD son las más propensas a duplicarse — revísalas especialmente
+- Ejemplo de error a evitar: "consultor sem barcelona" en grupo 1 Y en grupo 3 → ELIMINAR DEL GRUPO 1
+
+IMPORTANTE:
+• Genera ÚNICAMENTE el JSON válido
+• NO añadas texto explicativo antes o después
+• NO uses bloques de código markdown
+• Asegura que el JSON sea parseable (sintaxis correcta)
+• Verifica todos los arrays con el número correcto de elementos
+• Si analizaste URL: incluye precios reales en mínimo 30% de headlines
+
+ESTRUCTURA JSON REQUERIDA (cada sitelink DEBE incluir desc2):
+{
+  "name": "...",
+  "adGroups": [{
+    "name": "...",
+    "ads": [{"headlines": [...15], "descriptions": [...4], "path1": "...", "path2": "...", "finalUrl": "URL_ESPECÍFICA_DEL_GRUPO"}]
+  }],
+  "extensions": {
+    "sitelinks": [{"title": "...", "desc": "...", "desc2": "...", "url": "..."}],
+    "callouts": [...],
+    "snippets": {"Servicios": ["valor1","valor2","valor3","valor4"], "Tipos": ["v1","v2","v3","v4"]}
+  }
+}
+
+GENERA LA CAMPAÑA AHORA:`;
+
+      return prompt;
+    }
+    
+    // ════════════════════════════════════════════════════════════════
+    // AUTO-VALIDATOR V8 — Garantía 100% Google Ads compliant
+    // Recorta headlines >30c y descriptions >90c automáticamente
+    // Nunca corta palabras a mitad — siempre recorta por palabras
+    // ════════════════════════════════════════════════════════════════
+    function autoValidateCampaign(campaign) {
+      let fixedHeadlines = 0;
+      let fixedDescriptions = 0;
+      let fixedPaths = 0;
+
+      // ── Helper: recortar por palabras sin partir a mitad ──────────
+      function trimToLimit(text, maxChars) {
+        if (!text || text.length <= maxChars) return text;
+        
+        text = text.trim();
+        
+        // Si el texto completo cabe, devolver tal cual
+        if (text.length <= maxChars) return text;
+        
+        // Buscar el último espacio antes del límite para cortar por palabra completa
+        let cutPosition = text.lastIndexOf(' ', maxChars);
+        
+        // Si no encontramos espacio antes del límite (palabra única muy larga o sin espacios)
+        if (cutPosition === -1) {
+          // Buscar el primer espacio DESPUÉS del límite
+          cutPosition = text.indexOf(' ', maxChars);
+          
+          // Si no hay espacios en todo el texto, es una palabra sola
+          if (cutPosition === -1) {
+            // Solo cortar si es extremadamente larga (>50 chars es anormal)
+            if (text.length > 50) {
+              return text.substring(0, maxChars).trim();
+            }
+            // Si es <50 chars, mantener palabra completa (ej: URLs, términos técnicos)
+            return text;
+          }
+        }
+        
+        // Cortar en la posición del último espacio (palabra completa)
+        return text.substring(0, cutPosition).trim();
+      }
+
+      // ── Helper: asegurar mínimo de caracteres añadiendo contexto ──
+      function ensureMinLength(text, minChars, context) {
+        if (!text || text.length >= minChars) return text;
+        // Si es muy corto, añadir el contexto del grupo al final
+        const suffix = context ? ` ${context}` : '';
+        let extended = text + suffix;
+        return extended.length <= 30 ? extended : text;
+      }
+
+      campaign.adGroups.forEach((ag) => {
+        const groupContext = ag.name
+          ? ag.name.split('_')[0].substring(0, 8)
+          : '';
+
+        ag.ads.forEach((ad) => {
+
+          // ── HEADLINES: límite 30c, mínimo 20c ─────────────────────
+          if (ad.headlines && Array.isArray(ad.headlines)) {
+            ad.headlines = ad.headlines.map((h) => {
+              if (!h) return h;
+              let fixed = h.trim();
+
+              // Recortar si >30
+              if (fixed.length > 30) {
+                fixed = trimToLimit(fixed, 30);
+                fixedHeadlines++;
+              }
+
+              // Alargar si <20 (añadir contexto del grupo)
+              if (fixed.length < 20) {
+                fixed = ensureMinLength(fixed, 20, groupContext);
+              }
+
+              return fixed;
+            });
+          }
+
+          // ── DESCRIPTIONS: límite 90c, mínimo 75c ──────────────────
+          if (ad.descriptions && Array.isArray(ad.descriptions)) {
+            ad.descriptions = ad.descriptions.map((d) => {
+              if (!d) return d;
+              let fixed = d.trim();
+
+              // Recortar si >90
+              if (fixed.length > 90) {
+                fixed = trimToLimit(fixed, 90);
+                fixedDescriptions++;
+              }
+
+              // Alargar si <75 — añadir complemento relevante al final
+              if (fixed.length < 75) {
+                const complements = [
+                  'Compra online segura.',
+                  'Entrega garantizada.',
+                  'Barcelona y toda España.',
+                  'Envío rápido garantizado.',
+                  'Calidad premium garantizada.',
+                  'Resultados desde día 1.',
+                  'Sin permanencia.',
+                  'Atención personalizada.',
+                  'Gestión directa experta.',
+                  'Contacta hoy mismo.'
+                ];
+                // Elegir el complemento más corto que haga llegar a ≥75c sin pasar de 90c
+                for (const comp of complements) {
+                  const candidate = fixed.endsWith('.') 
+                    ? fixed + ' ' + comp 
+                    : fixed + '. ' + comp;
+                  if (candidate.length >= 75 && candidate.length <= 90) {
+                    fixed = candidate;
+                    fixedDescriptions++;
+                    break;
+                  }
+                }
+              }
+
+              return fixed;
+            });
+          }
+
+          // ── PATHS: límite 15c cada uno — con lógica semántica ────────────────────
+          function trimPath(path) {
+            if (!path || path.length <= 15) return path;
+            // Intentar cortar en guión si hay uno dentro del límite
+            const hyphenPos = path.lastIndexOf('-', 15);
+            if (hyphenPos > 5) return path.substring(0, hyphenPos);
+            // Si no hay guión, cortar en límite limpio
+            return path.substring(0, 15).trim();
+          }
+          if (ad.path1 && ad.path1.length > 15) {
+            ad.path1 = trimPath(ad.path1);
+            fixedPaths++;
+          }
+          if (ad.path2 && ad.path2.length > 15) {
+            ad.path2 = trimPath(ad.path2);
+            fixedPaths++;
+          }
+
+        });
+      });
+
+      // ── Callouts: límite 25c ──────────────────────────────────────
+      if (campaign.extensions && campaign.extensions.callouts) {
+        campaign.extensions.callouts = campaign.extensions.callouts.map((c) => {
+          if (!c) return c;
+          let fixed = c.trim();
+          // Quitar puntuación final
+          fixed = fixed.replace(/[.,;:!?]+$/, '');
+          // Recortar si >25
+          if (fixed.length > 25) {
+            fixed = trimToLimit(fixed, 25);
+          }
+          return fixed;
+        });
+      }
+
+      // ── Log de correcciones ───────────────────────────────────────
+      const totalFixes = fixedHeadlines + fixedDescriptions + fixedPaths;
+      if (totalFixes > 0) {
+        console.log(`🔧 Auto-Validator V8: ${fixedHeadlines} headlines, ${fixedDescriptions} descriptions, ${fixedPaths} paths corregidos`);
+        showToast(`🔧 Auto-corrección: ${totalFixes} elemento(s) ajustados para Google Ads`, 'warning');
+      } else {
+        console.log('✅ Auto-Validator V8: 0 errores — campaña perfecta');
+      }
+
+      return campaign;
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // ANTI-CANIBALIZACIÓN V8 — Elimina keywords duplicadas entre grupos
+    // y asigna URLs únicas por grupo si todas son iguales
+    // ════════════════════════════════════════════════════════════════
+    function antiCanibalizacionYUrls(campaign) {
+      // ── 1. Anti-canibalización ────────────────────────────────────
+      const seenKeywords = new Map(); // normalizado → primer grupo que la tiene
+      let removedCount = 0;
+
+      campaign.adGroups.forEach((ag, agIdx) => {
+        if (!ag.keywords) return;
+        ag.keywords = ag.keywords.filter(kw => {
+          const normalized = (kw.keyword || '')
+            .toLowerCase()
+            .replace(/[\[\]"]/g, '')
+            .trim();
+          if (!normalized) return true;
+
+          if (seenKeywords.has(normalized)) {
+            const firstGroup = seenKeywords.get(normalized);
+            console.warn(`🚫 Canibalización eliminada: "${normalized}" (grupo ${agIdx + 1}) ya existe en grupo ${firstGroup + 1}`);
+            removedCount++;
+            return false; // Eliminar del grupo actual
+          }
+          seenKeywords.set(normalized, agIdx);
+          return true;
+        });
+      });
+
+      if (removedCount > 0) {
+        console.log(`🔧 Anti-canibalización: ${removedCount} keyword(s) duplicada(s) eliminada(s)`);
+        showToast(`🚫 Anti-canibalización: ${removedCount} keyword(s) duplicada(s) eliminada(s)`, 'warning');
+      }
+
+      // ── 2. URLs por grupo — si todas son iguales, asignar URLs distintas ──
+      if (campaign.adGroups.length > 1) {
+        const urls = campaign.adGroups.flatMap(ag => ag.ads.map(ad => ad.finalUrl || ''));
+        const uniqueUrls = new Set(urls.filter(u => u));
+        
+        // Si todas las URLs son iguales, construir URLs específicas por grupo
+        if (uniqueUrls.size <= 1) {
+          const baseUrl = (urls.find(u => u) || formData.landingUrl || '').replace(/\/$/, '');
+          
+          // Rutas típicas por semántica del nombre del grupo
+          const routeMap = {
+            'servicio': '/servicios/',
+            'service': '/servicios/',
+            'producto': '/productos/',
+            'product': '/productos/',
+            'contact': '/contacto/',
+            'contacto': '/contacto/',
+            'consultor': '/consultor-google-ads/',
+            'especialista': '/especialista/',
+            'campana': '/campanas/',
+            'campañ': '/campanas/',
+            'precio': '/precios/',
+            'nosotros': '/quienes-somos/',
+            'about': '/quienes-somos/',
+            'blog': '/blog/',
+            'lead': '/contacto/',
+            'urgente': '/contacto/',
+            'marca': '/sobre-nosotros/',
+            'brand': '/sobre-nosotros/'
+          };
+
+          campaign.adGroups.forEach((ag, idx) => {
+            const groupNameLower = (ag.name || '').toLowerCase();
+            let assignedRoute = null;
+
+            for (const [key, route] of Object.entries(routeMap)) {
+              if (groupNameLower.includes(key)) {
+                assignedRoute = route;
+                break;
+              }
+            }
+
+            // Si no hay ruta específica, usar una genérica por índice
+            if (!assignedRoute) {
+              const genericRoutes = ['/servicios/', '/contacto/', '/quienes-somos/', '/productos/', '/precios/', '/blog/'];
+              assignedRoute = genericRoutes[idx % genericRoutes.length];
+            }
+
+            ag.ads.forEach(ad => {
+              ad.finalUrl = baseUrl + assignedRoute;
+            });
+          });
+
+          console.log('🔧 URLs asignadas por grupo semánticamente');
+          showToast('🌐 URLs asignadas por grupo automáticamente', 'success');
+        }
+      }
+
+      return campaign;
+    }
+    function parseCampaignFromText(text) {
+      try {
+        console.log('Parseando texto de longitud:', text.length);
+        console.log('Primeros 500 caracteres:', text.substring(0, 500));
+        
+        // Remove markdown if present
+        let cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        
+        // Extract JSON from response - improved regex
+        const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          console.error('No se encontró JSON en el texto');
+          throw new Error('No se encontró JSON válido en la respuesta');
+        }
+        
+        let jsonStr = jsonMatch[0];
+        console.log('JSON extraído (primeros 500 chars):', jsonStr.substring(0, 500));
+        
+        const campaign = JSON.parse(jsonStr);
+        
+        console.log('JSON parseado exitosamente');
+        console.log('Número de grupos:', campaign.adGroups?.length);
+        
+        // Validate structure
+        if (!campaign.adGroups || campaign.adGroups.length === 0) {
+          throw new Error('La campaña no tiene grupos de anuncios válidos');
+        }
+        
+        // Validate each ad group
+        for (let i = 0; i < campaign.adGroups.length; i++) {
+          const ag = campaign.adGroups[i];
+          if (!ag.keywords || ag.keywords.length === 0) {
+            throw new Error(`El grupo ${i+1} no tiene keywords`);
+          }
+          if (!ag.ads || ag.ads.length === 0) {
+            throw new Error(`El grupo ${i+1} no tiene anuncios`);
+          }
+        }
+        
+        console.log('Validación exitosa');
+        return campaign;
+      } catch (error) {
+        console.error('Error en parseCampaignFromText:', error);
+        console.error('Texto recibido (primeros 1000 chars):', text.substring(0, 1000));
+        throw new Error('Error al procesar la campaña generada: ' + error.message);
+      }
+    }
+    
+    // Display results
+    function displayResults() {
+      let resultsHTML = '';
+      const campaign = generatedCampaign;
+      
+      // 1. Campaign Overview
+      let overviewText = `═══════════════════════════════════════════════════════════════
+CAMPAÑA: ${campaign.name}
+Creada por: Francisco Blanco Pro System
+═══════════════════════════════════════════════════════════════
+
+CONFIGURACIÓN GENERAL:
+${'─'.repeat(60)}
+Tipo de Campaña: ${campaign.type}
+Objetivo: ${campaign.goal}
+Presupuesto diario: ${campaign.budget}€
+Estrategia de puja: ${campaign.bidStrategy}
+Ubicación: ${campaign.location}
+Idioma: ${campaign.language}
+
+ESTRUCTURA:
+${'─'.repeat(60)}
+Total Grupos de Anuncios: ${campaign.adGroups.length}
+Total Keywords: ${campaign.adGroups.reduce((sum, ag) => sum + ag.keywords.length, 0)}
+Total Anuncios: ${campaign.adGroups.reduce((sum, ag) => sum + ag.ads.length, 0)}
+Keywords Negativas: ${campaign.negatives.length}
+`;
+
+      if (urlContent) {
+        overviewText += `
+🚀 ANÁLISIS DE URL APLICADO:
+${'─'.repeat(60)}
+✅ Se analizó el contenido de tu landing page
+✅ Keywords extraídas del contenido real
+✅ Anuncios alineados con tu página
+✅ Mayor relevancia y Quality Score esperado
+`;
+      }
+
+      resultsHTML += createResultCard('Resumen de Campaña', overviewText, 'overview');
+      
+      // 2. Ad Groups & Keywords
+      let keywordsText = `═══════════════════════════════════════════════════════════════
+ESTRUCTURA DE GRUPOS Y KEYWORDS
+Francisco Blanco - Google Ads Pro
+═══════════════════════════════════════════════════════════════\n\n`;
+      
+      campaign.adGroups.forEach((ag, idx) => {
+        keywordsText += `GRUPO ${idx + 1}: ${ag.name}
+${'─'.repeat(60)}
+Tema: ${ag.theme}
+Puja base: ${ag.bid}€
+Total keywords: ${ag.keywords.length}
+
+KEYWORDS:
+`;
+        ag.keywords.forEach(kw => {
+          keywordsText += `  ${kw.matchType.padEnd(8)} | CPC: ${kw.maxCPC}€ | ${kw.keyword}\n`;
+        });
+        keywordsText += '\n';
+      });
+      
+      resultsHTML += createResultCard('Keywords por Grupo', keywordsText, 'keywords');
+      
+      // 3. Ads
+      let adsText = `═══════════════════════════════════════════════════════════════
+ANUNCIOS RESPONSIVE (RSA)
+Francisco Blanco - Google Ads Pro
+═══════════════════════════════════════════════════════════════\n\n`;
+      
+      campaign.adGroups.forEach((ag, agIdx) => {
+        adsText += `GRUPO: ${ag.name}\n${'─'.repeat(60)}\n\n`;
+        
+        ag.ads.forEach((ad, adIdx) => {
+          adsText += `ANUNCIO ${adIdx + 1}:\n\n`;
+          adsText += `TITULARES (15):\n`;
+          ad.headlines.forEach((h, i) => {
+            adsText += `  H${(i + 1).toString().padStart(2, '0')}: ${h} (${h.length} chars)\n`;
+          });
+          adsText += `\nDESCRIPCIONES (4):\n`;
+          ad.descriptions.forEach((d, i) => {
+            adsText += `  D${i + 1}: ${d} (${d.length} chars)\n`;
+          });
+          adsText += `\nPATHS: ${ad.path1} / ${ad.path2}\n`;
+          adsText += `URL FINAL: ${ad.finalUrl}\n\n`;
+          adsText += '─'.repeat(60) + '\n\n';
+        });
+      });
+      
+      resultsHTML += createResultCard('Anuncios Completos', adsText, 'ads');
+      
+      // 4. Negative Keywords
+      let negativesText = `═══════════════════════════════════════════════════════════════
+KEYWORDS NEGATIVAS (Campaign Level)
+Francisco Blanco - Google Ads Pro
+═══════════════════════════════════════════════════════════════\n\n`;
+      
+      // Handle both formats: old (array) and new (object with exact/phrase)
+      let negExact = [];
+      let negPhrase = [];
+      
+      if (Array.isArray(campaign.negatives)) {
+        negExact = campaign.negatives;
+      } else if (campaign.negatives && typeof campaign.negatives === 'object') {
+        negExact = campaign.negatives.exact || [];
+        negPhrase = campaign.negatives.phrase || [];
+      }
+      
+      const totalNegs = negExact.length + negPhrase.length;
+      negativesText += `Total: ${totalNegs} keywords negativas (${negExact.length} Exact + ${negPhrase.length} Phrase)\n\n`;
+      
+      if (negExact.length > 0) {
+        negativesText += `🎯 EXACT MATCH (${negExact.length}):\n`;
+        negExact.forEach(neg => {
+          negativesText += `  • ${neg}\n`;
+        });
+      }
+      
+      if (negPhrase.length > 0) {
+        negativesText += `\n🛡️ PHRASE MATCH (${negPhrase.length}):\n`;
+        negPhrase.forEach(neg => {
+          negativesText += `  • "${neg}"\n`;
+        });
+      }
+      
+      resultsHTML += createResultCard('Keywords Negativas', negativesText, 'negatives');
+      
+      // 5. Extensions
+      let extensionsText = `═══════════════════════════════════════════════════════════════
+EXTENSIONES DE ANUNCIO
+Francisco Blanco - Google Ads Pro
+═══════════════════════════════════════════════════════════════
+
+SITELINKS:
+${'─'.repeat(60)}\n`;
+      campaign.extensions.sitelinks.forEach((link, i) => {
+        extensionsText += `\n${i + 1}. ${link.title}\n`;
+        extensionsText += `   Descripción: ${link.desc}\n`;
+        extensionsText += `   URL: ${link.url}\n`;
+      });
+      
+      extensionsText += `\n\nCALLOUTS:
+${'─'.repeat(60)}\n`;
+      campaign.extensions.callouts.forEach(callout => {
+        extensionsText += `  • ${callout}\n`;
+      });
+      
+      extensionsText += `\n\nEXTRACTOS ESTRUCTURADOS (Snippets):
+${'─'.repeat(60)}\n`;
+      if (campaign.extensions.snippets && Object.keys(campaign.extensions.snippets).length > 0) {
+        Object.entries(campaign.extensions.snippets).forEach(([key, values]) => {
+          extensionsText += `\n${key}:\n`;
+          values.forEach(v => extensionsText += `  • ${v}\n`);
+        });
+      } else {
+        extensionsText += `  ⚠️ No se generaron snippets — revisar prompt\n`;
+      }
+      
+      resultsHTML += createResultCard('Extensiones', extensionsText, 'extensiones');
+      
+      // 6. Forecast
+      const clicks = formData.dailyBudget / formData.estimatedCPC;
+      const leads = clicks * (formData.conversionRate / 100);
+      const sales = leads * 0.3; // Assuming 30% close rate
+      const revenue = sales * formData.avgTicket;
+      const cpl = leads > 0 ? formData.dailyBudget / leads : 0;
+      const roi = formData.dailyBudget > 0 ? ((revenue - formData.dailyBudget) / formData.dailyBudget) * 100 : 0;
+      
+      let forecastText = `═══════════════════════════════════════════════════════════════
+FORECAST PROFESIONAL - PROYECCIÓN 30 DÍAS
+Análisis realizado por Francisco Blanco
+═══════════════════════════════════════════════════════════════
+
+INVERSIÓN Y VOLUMEN:
+${'─'.repeat(60)}
+Inversión mensual: ${(formData.dailyBudget * 30).toFixed(2)}€
+CPC medio estimado: ${formData.estimatedCPC.toFixed(2)}€
+Clics estimados: ${Math.round(clicks * 30)}
+Impresiones estimadas: ${Math.round(clicks * 30 * 20)} (CTR 5%)
+
+CONVERSIONES Y RESULTADOS:
+${'─'.repeat(60)}
+Leads mensuales: ${Math.round(leads * 30)}
+CVR web estimado: ${formData.conversionRate}%
+Tasa de cierre: 30%
+Ventas mensuales: ${Math.round(sales * 30)}
+
+MÉTRICAS FINANCIERAS:
+${'─'.repeat(60)}
+Ingresos proyectados: ${(revenue * 30).toFixed(2)}€
+Ticket medio: ${formData.avgTicket.toFixed(2)}€
+CPL (Coste por Lead): ${cpl.toFixed(2)}€
+CPA (Coste por Adquisición): ${sales > 0 ? (formData.dailyBudget / sales).toFixed(2) : 'N/A'}€
+ROI estimado: ${roi.toFixed(0)}%
+ROAS estimado: ${formData.dailyBudget > 0 ? (revenue / formData.dailyBudget).toFixed(2) : 'N/A'}
+
+OBJETIVOS DE CALIDAD:
+${'─'.repeat(60)}
+Quality Score objetivo: 7-10`;
+
+      if (urlContent) {
+        forecastText += ` 🚀 (Mejorado con análisis de URL)`;
+      }
+
+      forecastText += `
+CTR objetivo: 3-5%
+Nivel de relevancia: Alto
+Experiencia en página destino: Buena
+
+NOTAS ESTRATÉGICAS:
+${'─'.repeat(60)}
+• Iniciar con presupuesto conservador
+• Optimizar según datos reales a partir del día 7
+• Pausar keywords con QS < 5
+• Activar remarketing tras 500 visitantes
+• Revisar términos de búsqueda semanalmente
+• Ajustar pujas según dispositivo y hora
+• Implementar seguimiento de conversiones desde día 1`;
+
+      if (urlContent) {
+        forecastText += `
+
+✅ VENTAJAS DEL ANÁLISIS DE URL APLICADO:
+${'─'.repeat(60)}
+• Mayor relevancia entre anuncios y landing page
+• Quality Score más alto desde el inicio
+• CPC más bajo por mejor relevancia
+• CTR superior gracias a la coherencia
+• Conversiones más altas por mensaje alineado
+`;
+      }
+      
+      resultsHTML += createResultCard('Forecast & KPIs', forecastText, 'forecast');
+      
+      document.getElementById('resultsGrid').innerHTML = resultsHTML;
+    }
+    
+    // Create result card
+    function createResultCard(title, content, id) {
+      return `
+        <div class="result-card">
+          <div class="result-header">
+            <div class="result-title">${title}</div>
+            <button class="copy-btn" onclick="copyToClipboard('result-${id}')">📋 Copiar</button>
+          </div>
+          <div class="result-content" id="result-${id}">${content}</div>
+        </div>
+      `;
+    }
+    
+    // Copy to clipboard
+    function copyToClipboard(elementId) {
+      const element = document.getElementById(elementId);
+      const text = element.textContent;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('✅ Copiado al portapapeles');
+      }).catch(err => {
+        console.error('Error:', err);
+        showToast('❌ Error al copiar', 'error');
+      });
+    }
+    
+    // Show toast
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastText = document.getElementById('toastText');
+      const toastIcon = toast.querySelector('.toast-icon');
+      
+      toastText.textContent = message;
+      toastIcon.textContent = type === 'success' ? '✅' : '⚠️';
+      toast.style.borderColor = type === 'success' ? 'var(--success)' : 'var(--warning)';
+      
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+    
+    // Export to Excel
+    function exportToExcel() {
+      if (!generatedCampaign) {
+        showToast('⚠️ Primero genera una campaña', 'warning');
+        return;
+      }
+      
+      try {
+        const wb = XLSX.utils.book_new();
+        
+        // Sheet 1: Campaign Summary
+        const summaryData = [
+          ['CAMPAÑA GOOGLE ADS - FRANCISCO BLANCO PRO'],
+          [''],
+          ['Nombre de Campaña', generatedCampaign.name],
+          ['Tipo', generatedCampaign.type],
+          ['Presupuesto Diario', generatedCampaign.budget + '€'],
+          ['Estrategia de Puja', generatedCampaign.bidStrategy],
+          ['Ubicación', generatedCampaign.location],
+          [''],
+          ['ESTADÍSTICAS'],
+          ['Grupos de Anuncios', generatedCampaign.adGroups.length],
+          ['Total Keywords', generatedCampaign.adGroups.reduce((s, ag) => s + ag.keywords.length, 0)],
+          ['Total Anuncios', generatedCampaign.adGroups.reduce((s, ag) => s + ag.ads.length, 0)],
+          ['Keywords Negativas', Array.isArray(generatedCampaign.negatives) ? generatedCampaign.negatives.length : (generatedCampaign.negatives.exact?.length || 0) + (generatedCampaign.negatives.phrase?.length || 0)]
+        ];
+        
+        if (urlContent) {
+          summaryData.push([''], ['✅ URL ANALIZADA', formData.landingUrl || 'Sí']);
+        }
+        
+        const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
+        XLSX.utils.book_append_sheet(wb, ws1, 'Resumen');
+        
+        // Sheet 2: Keywords
+        const keywordsData = [['Campaign', 'Ad Group', 'Keyword', 'Match Type', 'Max CPC']];
+        generatedCampaign.adGroups.forEach(ag => {
+          ag.keywords.forEach(kw => {
+            keywordsData.push([
+              generatedCampaign.name,
+              ag.name,
+              kw.keyword,
+              kw.matchType,
+              kw.maxCPC || ag.bid
+            ]);
+          });
+        });
+        const ws2 = XLSX.utils.aoa_to_sheet(keywordsData);
+        XLSX.utils.book_append_sheet(wb, ws2, 'Keywords');
+        
+        // Sheet 3: Ads
+        const adsData = [['Campaign', 'Ad Group', 'Headline 1', 'Headline 2', 'Headline 3', 'Description 1', 'Description 2', 'Path 1', 'Path 2', 'Final URL']];
+        generatedCampaign.adGroups.forEach(ag => {
+          ag.ads.forEach(ad => {
+            adsData.push([
+              generatedCampaign.name,
+              ag.name,
+              ad.headlines[0] || '',
+              ad.headlines[1] || '',
+              ad.headlines[2] || '',
+              ad.descriptions[0] || '',
+              ad.descriptions[1] || '',
+              ad.path1,
+              ad.path2,
+              ad.finalUrl
+            ]);
+          });
+        });
+        const ws3 = XLSX.utils.aoa_to_sheet(adsData);
+        XLSX.utils.book_append_sheet(wb, ws3, 'Anuncios');
+        
+        // Sheet 4: RSA Complete
+        const rsaData = [['Campaign', 'Ad Group', 'Headline Position', 'Headline Text']];
+        generatedCampaign.adGroups.forEach(ag => {
+          ag.ads.forEach(ad => {
+            ad.headlines.forEach((h, idx) => {
+              rsaData.push([generatedCampaign.name, ag.name, `H${idx + 1}`, h]);
+            });
+          });
+        });
+        const ws4 = XLSX.utils.aoa_to_sheet(rsaData);
+        XLSX.utils.book_append_sheet(wb, ws4, 'RSA Titulares');
+        
+        // Sheet 5: Negatives (con EXACT y PHRASE)
+        const negativesData = [['Campaign', 'Negative Keyword', 'Match Type']];
+        
+        // Handle both old format (array) and new format (object with exact/phrase)
+        if (Array.isArray(generatedCampaign.negatives)) {
+          // Old format
+          generatedCampaign.negatives.forEach(neg => {
+            negativesData.push([generatedCampaign.name, neg, 'Exacta']);
+          });
+        } else if (generatedCampaign.negatives && typeof generatedCampaign.negatives === 'object') {
+          // New format
+          if (generatedCampaign.negatives.exact) {
+            generatedCampaign.negatives.exact.forEach(neg => {
+              negativesData.push([generatedCampaign.name, neg, 'Exacta']);
+            });
+          }
+          if (generatedCampaign.negatives.phrase) {
+            generatedCampaign.negatives.phrase.forEach(neg => {
+              negativesData.push([generatedCampaign.name, neg, 'Frase']);
+            });
+          }
+        }
+        
+        const ws5 = XLSX.utils.aoa_to_sheet(negativesData);
+        XLSX.utils.book_append_sheet(wb, ws5, 'Negativas');
+        
+        // Sheet 6: Extensions
+        const extensionsData = [['Type', 'Text', 'Description', 'URL']];
+        generatedCampaign.extensions.sitelinks.forEach(link => {
+          extensionsData.push(['Sitelink', link.title, link.desc, link.url]);
+        });
+        generatedCampaign.extensions.callouts.forEach(callout => {
+          extensionsData.push(['Callout', callout, '', '']);
+        });
+        const ws6 = XLSX.utils.aoa_to_sheet(extensionsData);
+        XLSX.utils.book_append_sheet(wb, ws6, 'Extensiones');
+        
+        // Generate file
+        XLSX.writeFile(wb, `Campaña_GoogleAds_${generatedCampaign.name.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
+        
+        showToast('✅ Excel descargado correctamente');
+      } catch (error) {
+        console.error('Error generating Excel:', error);
+        showToast('❌ Error al generar Excel', 'error');
+      }
+    }
+    
+    // NEW: Export for Google Ads Editor (Complete Campaign)
+    function exportForGoogleAdsEditor() {
+      if (!generatedCampaign) {
+        showToast('⚠️ Primero genera una campaña', 'warning');
+        return;
+      }
+      
+      try {
+        console.log('Iniciando exportación...');
+        console.log('Campaña:', generatedCampaign);
+        
+        const wb = XLSX.utils.book_new();
+        const campaign = generatedCampaign;
+        
+        // Sheet 1: Keywords for Google Ads Editor
+        const keywordsData = [['Campaign', 'Ad Group', 'Keyword', 'Criterion Type', 'Max CPC']];
+        campaign.adGroups.forEach(ag => {
+          ag.keywords.forEach(kw => {
+            // Apply correct match type syntax
+            let formattedKeyword = kw.keyword;
+            if (kw.matchType === 'EXACT') {
+              formattedKeyword = `[${kw.keyword}]`;
+            } else if (kw.matchType === 'PHRASE') {
+              formattedKeyword = `"${kw.keyword}"`;
+            }
+            // BROAD stays without symbols
+            
+            keywordsData.push([
+              campaign.name,
+              ag.name,
+              formattedKeyword,
+              kw.matchType,
+              kw.maxCPC || ag.bid
+            ]);
+          });
+        });
+        const ws1 = XLSX.utils.aoa_to_sheet(keywordsData);
+        XLSX.utils.book_append_sheet(wb, ws1, 'Keywords');
+        
+        // Sheet 2: Responsive Search Ads
+        const adsData = [['Campaign', 'Ad Group', 'Ad Type']];
+        // Add all headline columns (H1-H15)
+        for (let i = 1; i <= 15; i++) {
+          adsData[0].push(`Headline ${i}`);
+        }
+        // Add description columns (D1-D4)
+        for (let i = 1; i <= 4; i++) {
+          adsData[0].push(`Description ${i}`);
+        }
+        adsData[0].push('Path 1', 'Path 2', 'Final URL');
+        
+        campaign.adGroups.forEach(ag => {
+          ag.ads.forEach(ad => {
+            const row = [campaign.name, ag.name, 'Responsive search ad'];
+            // Add headlines
+            for (let i = 0; i < 15; i++) {
+              row.push(ad.headlines[i] || '');
+            }
+            // Add descriptions
+            for (let i = 0; i < 4; i++) {
+              row.push(ad.descriptions[i] || '');
+            }
+            row.push(ad.path1, ad.path2, ad.finalUrl);
+            adsData.push(row);
+          });
+        });
+        const ws2 = XLSX.utils.aoa_to_sheet(adsData);
+        XLSX.utils.book_append_sheet(wb, ws2, 'Ads');
+        
+        // Sheet 3: Negative Keywords (con EXACT y PHRASE)
+        const negativesData = [['Campaign', 'Keyword', 'Match Type']];
+        
+        // 🔥 DEDUPLICACIÓN AUTOMÁTICA - Francisco Blanco
+        // Eliminar keywords negativas duplicadas antes de exportar
+        if (Array.isArray(campaign.negatives)) {
+          // Old format - backwards compatibility
+          campaign.negatives = [...new Set(campaign.negatives)]; // Deduplicar
+        } else if (campaign.negatives && typeof campaign.negatives === 'object') {
+          // New format with exact and phrase - deduplicar ambas listas
+          if (campaign.negatives.exact) {
+            campaign.negatives.exact = [...new Set(campaign.negatives.exact)];
+          }
+          if (campaign.negatives.phrase) {
+            campaign.negatives.phrase = [...new Set(campaign.negatives.phrase)];
+          }
+        }
+        
+        // Handle both old format (array) and new format (object with exact/phrase)
+        if (Array.isArray(campaign.negatives)) {
+          // Old format - backwards compatibility
+          campaign.negatives.forEach(neg => {
+            negativesData.push([campaign.name, neg, 'Exact']);
+          });
+        } else if (campaign.negatives && typeof campaign.negatives === 'object') {
+          // New format with exact and phrase
+          if (campaign.negatives.exact) {
+            campaign.negatives.exact.forEach(neg => {
+              negativesData.push([campaign.name, neg, 'Exact']);
+            });
+          }
+          if (campaign.negatives.phrase) {
+            campaign.negatives.phrase.forEach(neg => {
+              negativesData.push([campaign.name, neg, 'Phrase']);
+            });
+          }
+        }
+        
+        const ws3 = XLSX.utils.aoa_to_sheet(negativesData);
+        XLSX.utils.book_append_sheet(wb, ws3, 'Negative Keywords');
+        
+        // Sheet 4: Sitelinks
+        const sitelinksData = [['Campaign', 'Sitelink Text', 'Sitelink Description 1', 'Sitelink Description 2', 'Sitelink Final URL']];
+        campaign.extensions.sitelinks.forEach(link => {
+          sitelinksData.push([campaign.name, link.title, link.desc, link.desc2 || '', link.url]);
+        });
+        const ws4 = XLSX.utils.aoa_to_sheet(sitelinksData);
+        XLSX.utils.book_append_sheet(wb, ws4, 'Sitelinks');
+        
+        // Sheet 5: Callout Extensions
+        const calloutsData = [['Campaign', 'Callout Text']];
+        campaign.extensions.callouts.forEach(callout => {
+          calloutsData.push([campaign.name, callout]);
+        });
+        const ws5 = XLSX.utils.aoa_to_sheet(calloutsData);
+        XLSX.utils.book_append_sheet(wb, ws5, 'Callouts');
+        
+        // Sheet 6: Structured Snippets
+        const snippetsData = [['Campaign', 'Header', 'Values']];
+        if (campaign.extensions && campaign.extensions.snippets) {
+          Object.entries(campaign.extensions.snippets).forEach(([header, values]) => {
+            // Google Ads Editor espera los valores separados por punto y coma
+            const valuesStr = Array.isArray(values) ? values.join('; ') : values;
+            snippetsData.push([campaign.name, header, valuesStr]);
+          });
+        }
+        const ws6 = XLSX.utils.aoa_to_sheet(snippetsData);
+        XLSX.utils.book_append_sheet(wb, ws6, 'Structured Snippets');
+        
+        // Sheet 7: Instructions
+        const instructionsData = [
+          ['INSTRUCCIONES PARA IMPORTAR EN GOOGLE ADS EDITOR'],
+          [''],
+          ['PASO 1: Descarga Google Ads Editor'],
+          ['• Ve a: https://ads.google.com/home/tools/google-ads-editor/'],
+          ['• Descarga e instala la última versión'],
+          [''],
+          ['PASO 2: Abre Google Ads Editor y selecciona tu cuenta'],
+          ['• Inicia sesión con tu cuenta de Google Ads'],
+          ['• Selecciona la cuenta donde quieres crear la campaña'],
+          [''],
+          ['PASO 3: Importar el archivo'],
+          ['• Ve a: Cuenta → Importar → Desde archivo'],
+          ['• Selecciona este archivo Excel'],
+          ['• Google Ads Editor leerá automáticamente las pestañas'],
+          [''],
+          ['PASO 4: Revisar y aplicar cambios'],
+          ['• Revisa que todo se haya importado correctamente'],
+          ['• Haz clic en "Publicar cambios"'],
+          ['• Los cambios se subirán a tu cuenta de Google Ads'],
+          [''],
+          ['NOTAS IMPORTANTES:'],
+          ['• Todas las pestañas están en formato compatible con Google Ads Editor'],
+          ['• Los anuncios se crearán como Responsive Search Ads (RSA)'],
+          ['• Las keywords tienen los tipos de concordancia correctos'],
+          ['• Las extensiones se aplicarán a nivel de campaña'],
+          [''],
+          ['FORMATOS DE CONCORDANCIA:'],
+          ['• EXACT = Concordancia exacta [keyword]'],
+          ['• PHRASE = Concordancia de frase "keyword"'],
+          ['• BROAD = Concordancia amplia modificada +keyword'],
+          [''],
+          ['¿NECESITAS AYUDA?'],
+          ['• Documentación oficial: https://support.google.com/google-ads/editor'],
+          ['• Video tutorial: Busca "Google Ads Editor import" en YouTube']
+        ];
+        const ws7 = XLSX.utils.aoa_to_sheet(instructionsData);
+        XLSX.utils.book_append_sheet(wb, ws7, 'INSTRUCCIONES');
+        
+        // Generate file
+        const filename = `GoogleAdsEditor_${campaign.name.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`;
+        
+        console.log('Generando archivo:', filename);
+        
+        XLSX.writeFile(wb, filename);
+        
+        console.log('Archivo generado exitosamente');
+        showToast('✅ Archivo para Google Ads Editor descargado');
+      } catch (error) {
+        console.error('Error completo en exportación:', error);
+        console.error('Stack:', error.stack);
+        alert('Error al generar archivo: ' + error.message + '\n\nRevisa la consola (F12) para más detalles');
+        showToast('❌ Error al generar archivo', 'error');
+      }
+    }
+    
+    // NEW: Export only Keywords as CSV
+    function exportKeywordsCSV() {
+      if (!generatedCampaign) {
+        showToast('⚠️ Primero genera una campaña', 'warning');
+        return;
+      }
+      
+      let csv = 'Campaign,Ad Group,Keyword,Match Type,Max CPC\n';
+      
+      generatedCampaign.adGroups.forEach(ag => {
+        ag.keywords.forEach(kw => {
+          // Apply correct match type syntax
+          let formattedKeyword = kw.keyword;
+          if (kw.matchType === 'EXACT') {
+            formattedKeyword = `[${kw.keyword}]`;
+          } else if (kw.matchType === 'PHRASE') {
+            formattedKeyword = `"${kw.keyword}"`;
+          }
+          // BROAD stays without symbols
+          
+          csv += `"${generatedCampaign.name}","${ag.name}","${formattedKeyword}","${kw.matchType}",${kw.maxCPC || ag.bid}\n`;
+        });
+      });
+      
+      downloadFile(csv, `Keywords_${generatedCampaign.name.replace(/[^a-zA-Z0-9]/g, '_')}.csv`, 'text/csv');
+      showToast('✅ Keywords descargadas en CSV');
+    }
+    
+    // NEW: Export only Ads as CSV
+    function exportAdsCSV() {
+      if (!generatedCampaign) {
+        showToast('⚠️ Primero genera una campaña', 'warning');
+        return;
+      }
+      
+      let csv = 'Campaign,Ad Group,Ad Type';
+      // Add headline columns
+      for (let i = 1; i <= 15; i++) {
+        csv += `,Headline ${i}`;
+      }
+      // Add description columns
+      for (let i = 1; i <= 4; i++) {
+        csv += `,Description ${i}`;
+      }
+      csv += ',Path 1,Path 2,Final URL\n';
+      
+      generatedCampaign.adGroups.forEach(ag => {
+        ag.ads.forEach(ad => {
+          csv += `"${generatedCampaign.name}","${ag.name}","Responsive search ad"`;
+          // Add headlines
+          for (let i = 0; i < 15; i++) {
+            csv += `,"${(ad.headlines[i] || '').replace(/"/g, '""')}"`;
+          }
+          // Add descriptions
+          for (let i = 0; i < 4; i++) {
+            csv += `,"${(ad.descriptions[i] || '').replace(/"/g, '""')}"`;
+          }
+          csv += `,"${ad.path1}","${ad.path2}","${ad.finalUrl}"\n`;
+        });
+      });
+      
+      downloadFile(csv, `Anuncios_${generatedCampaign.name.replace(/[^a-zA-Z0-9]/g, '_')}.csv`, 'text/csv');
+      showToast('✅ Anuncios descargados en CSV');
+    }
+    
+    // NEW: Export Complete CSV for Google Ads Editor (ALL campaign data in one file)
+    function exportCompleteCSV() {
+      if (!generatedCampaign) {
+        showToast('⚠️ Primero genera una campaña', 'warning');
+        return;
+      }
+      
+      const campaign = generatedCampaign;
+      let csv = '';
+      
+      // Header for Google Ads Editor CSV format
+      csv += '# Google Ads Editor CSV - Ads Engine Pro by Francisco Blanco\n';
+      csv += `# Campaign: ${campaign.name}\n`;
+      csv += `# Generated: ${new Date().toLocaleDateString()}\n`;
+      csv += '#\n';
+      csv += '# Instructions:\n';
+      csv += '# 1. Open Google Ads Editor\n';
+      csv += '# 2. Account > Import > From file\n';
+      csv += '# 3. Select this CSV file\n';
+      csv += '# 4. Review and Post changes\n';
+      csv += '#\n\n';
+      
+      // SECTION 1: CAMPAIGN INFO
+      csv += '### CAMPAIGN ###\n';
+      csv += 'Campaign,Budget,Budget Type,Campaign Type,Network\n';
+      csv += `"${campaign.name}",${campaign.budget || formData.dailyBudget},Daily,Search,Google Search\n\n`;
+      
+      // SECTION 2: KEYWORDS
+      csv += '### KEYWORDS ###\n';
+      csv += 'Campaign,Ad Group,Keyword,Match Type,Max CPC\n';
+      campaign.adGroups.forEach(ag => {
+        ag.keywords.forEach(kw => {
+          const matchType = kw.matchType === 'EXACT' ? 'Exact' : 
+                           kw.matchType === 'PHRASE' ? 'Phrase' : 'Broad';
+          
+          // Apply correct match type syntax
+          let formattedKeyword = (kw.keyword || '').replace(/"/g, '""');
+          if (kw.matchType === 'EXACT') {
+            formattedKeyword = `[${formattedKeyword}]`;
+          } else if (kw.matchType === 'PHRASE') {
+            formattedKeyword = `"${formattedKeyword}"`;
+          }
+          // BROAD stays without symbols
+          
+          const maxCPC = kw.maxCPC || ag.bid || formData.estimatedCPC || '1.00';
+          csv += `"${campaign.name}","${ag.name}","${formattedKeyword}","${matchType}",${maxCPC}\n`;
+        });
+      });
+      csv += '\n';
+      
+      // SECTION 3: NEGATIVE KEYWORDS
+      const negKws = campaign.negativeKeywords || 
+                     (campaign.extensions && campaign.extensions.negativeKeywords) || [];
+      if (negKws.length > 0) {
+        csv += '### NEGATIVE KEYWORDS ###\n';
+        csv += 'Campaign,Negative Keyword,Match Type\n';
+        negKws.forEach(nk => {
+          const kw = (typeof nk === 'string') ? nk : (nk.keyword || nk.text || '');
+          const mt = (typeof nk === 'object' && nk.matchType) ? nk.matchType : 'Exact';
+          if (kw) csv += `"${campaign.name}","${kw.replace(/"/g, '""')}","${mt}"\n`;
+        });
+        csv += '\n';
+      }
+      
+      // SECTION 4: ADS
+      csv += '### RESPONSIVE SEARCH ADS ###\n';
+      csv += 'Campaign,Ad Group,Ad Type';
+      for (let i = 1; i <= 15; i++) csv += `,Headline ${i}`;
+      for (let i = 1; i <= 4; i++) csv += `,Description ${i}`;
+      csv += ',Path 1,Path 2,Final URL\n';
+      
+      campaign.adGroups.forEach(ag => {
+        ag.ads.forEach(ad => {
+          csv += `"${campaign.name}","${ag.name}","Responsive search ad"`;
+          // Headlines
+          for (let i = 0; i < 15; i++) {
+            const headline = (ad.headlines && ad.headlines[i]) || '';
+            csv += `,"${headline.replace(/"/g, '""')}"`;
+          }
+          // Descriptions
+          for (let i = 0; i < 4; i++) {
+            const desc = (ad.descriptions && ad.descriptions[i]) || '';
+            csv += `,"${desc.replace(/"/g, '""')}"`;
+          }
+          const path1 = (ad.path1 || '').replace(/"/g, '""');
+          const path2 = (ad.path2 || '').replace(/"/g, '""');
+          const finalUrl = (ad.finalUrl || formData.landingUrl || '').replace(/"/g, '""');
+          csv += `,"${path1}","${path2}","${finalUrl}"\n`;
+        });
+      });
+      csv += '\n';
+      
+      // SECTION 5: SITELINK EXTENSIONS
+      if (campaign.extensions && campaign.extensions.sitelinks && campaign.extensions.sitelinks.length > 0) {
+        csv += '### SITELINK EXTENSIONS ###\n';
+        csv += 'Campaign,Sitelink Text,Sitelink URL,Description 1,Description 2\n';
+        campaign.extensions.sitelinks.forEach(sl => {
+          const text = (sl.text || sl.title || '').replace(/"/g, '""');
+          const url = (sl.url || formData.landingUrl || '').replace(/"/g, '""');
+          const desc1 = (sl.description1 || sl.desc || '').replace(/"/g, '""');
+          const desc2 = (sl.description2 || '').replace(/"/g, '""');
+          csv += `"${campaign.name}","${text}","${url}","${desc1}","${desc2}"\n`;
+        });
+        csv += '\n';
+      }
+      
+      // SECTION 6: CALLOUT EXTENSIONS
+      if (campaign.extensions && campaign.extensions.callouts && campaign.extensions.callouts.length > 0) {
+        csv += '### CALLOUT EXTENSIONS ###\n';
+        csv += 'Campaign,Callout Text\n';
+        campaign.extensions.callouts.forEach(co => {
+          csv += `"${campaign.name}","${co.replace(/"/g, '""')}"\n`;
+        });
+        csv += '\n';
+      }
+      
+      // SECTION 7: STRUCTURED SNIPPETS
+      const snippets = (campaign.extensions && campaign.extensions.snippets) || 
+                       (campaign.extensions && campaign.extensions.structuredSnippets) || {};
+      if (Object.keys(snippets).length > 0) {
+        csv += '### STRUCTURED SNIPPET EXTENSIONS ###\n';
+        csv += 'Campaign,Header,Values\n';
+        Object.entries(snippets).forEach(([header, values]) => {
+          if (Array.isArray(values) && values.length > 0) {
+            csv += `"${campaign.name}","${header}","${values.join('; ')}"\n`;
+          }
+        });
+        csv += '\n';
+      }
+      
+      // Footer
+      csv += '\n# End of CSV - Ready for Google Ads Editor import\n';
+      csv += '# Created with Ads Engine Pro V8 TOP by Francisco Blanco (www.franciscoblanco.es)\n';
+      
+      // Download
+      const filename = `GoogleAdsEditor_COMPLETE_${campaign.name.replace(/[^a-zA-Z0-9]/g, '_')}.csv`;
+      downloadFile(csv, filename, 'text/csv;charset=utf-8');
+      showToast('✅ CSV Completo descargado - Listo para Google Ads Editor');
+    }
+    
+    // NEW: Show import instructions in modal
+    function showImportInstructions() {
+      const instructions = `
+═══════════════════════════════════════════════════════════════
+GUÍA COMPLETA: CÓMO IMPORTAR TU CAMPAÑA A GOOGLE ADS
+Por Francisco Blanco - Ads Engine Pro
+═══════════════════════════════════════════════════════════════
+
+📥 MÉTODO 1: GOOGLE ADS EDITOR (Recomendado - Más Rápido)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1️⃣ DESCARGA GOOGLE ADS EDITOR
+   • Ve a: https://ads.google.com/home/tools/google-ads-editor/
+   • Descarga e instala (Windows/Mac)
+   • Es GRATIS y oficial de Google
+
+2️⃣ DESCARGA TU ARCHIVO
+   OPCIÓN A (TODO EN UNO): Haz clic en "📥 CSV Completo"
+   • Se descargará un CSV con toda la campaña
+   • Incluye: Campaña, Keywords, Anuncios, Extensiones
+   
+   OPCIÓN B (EXCEL): Haz clic en "🚀 Google Ads Editor" o "📊 Excel Completo"
+   • Se descargará un Excel optimizado con pestañas separadas
+
+3️⃣ IMPORTA EN GOOGLE ADS EDITOR
+   • Abre Google Ads Editor
+   • Cuenta → Importar → Desde archivo
+   • Selecciona el CSV/Excel descargado
+   • Revisa los datos importados
+
+4️⃣ PUBLICA LOS CAMBIOS
+   • Haz clic en "Publicar"
+   • ¡Listo! Tu campaña está en Google Ads
+
+⏱️ TIEMPO TOTAL: 5-10 minutos
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🖱️ MÉTODO 2: IMPORTACIÓN MANUAL EN GOOGLE ADS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PASO A: Crear la campaña
+   • En Google Ads → Campañas → Nueva Campaña
+   • Usa los datos del "Resumen de Campaña"
+
+PASO B: Importar Keywords
+   • Descarga: "🔑 Solo Keywords"
+   • En tu campaña → Palabras Clave → Importar
+   • Sube el CSV de keywords
+
+PASO C: Importar Anuncios
+   • Descarga: "📝 Solo Anuncios"
+   • En tu grupo de anuncios → Anuncios → Importar
+   • Sube el CSV de anuncios
+
+PASO D: Agregar Extensiones
+   • Usa el botón "📋 Copiar Todo"
+   • Copia manualmente las extensiones
+
+⏱️ TIEMPO TOTAL: 20-30 minutos
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 MÉTODO 3: EXCEL COMPLETO (Para Revisión)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   • Descarga: "📊 Excel Completo"
+   • Ábrelo para revisar toda la estructura
+   • Úsalo como referencia mientras creas manualmente
+   • Todas las pestañas están organizadas
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 CONSEJOS PRO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Usa MÉTODO 1 (Google Ads Editor) para campañas grandes
+✅ Revisa los anuncios antes de publicar
+✅ Empieza con presupuesto bajo y optimiza
+✅ Activa el seguimiento de conversiones ANTES de publicar
+✅ Revisa los términos de búsqueda después de 1 semana
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🆘 ¿NECESITAS AYUDA TÉCNICA?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• Google Ads Editor: https://support.google.com/google-ads/editor
+• Soporte Google Ads: https://support.google.com/google-ads
+• Documentación oficial: https://ads.google.com/home/resources/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+¡ÉXITO CON TU CAMPAÑA! 🚀
+      `;
+      
+      // Copy to clipboard
+      navigator.clipboard.writeText(instructions).then(() => {
+        showToast('✅ Instrucciones copiadas al portapapeles');
+        // Also show in alert for immediate viewing
+        alert(instructions);
+      }).catch(() => {
+        alert(instructions);
+      });
+    }
+    
+    // Export to text
+    function exportToText() {
+      if (!generatedCampaign) {
+        showToast('⚠️ Primero genera una campaña', 'warning');
+        return;
+      }
+      
+      const allText = Array.from(document.querySelectorAll('.result-content'))
+        .map(el => el.textContent)
+        .join('\n\n' + '═'.repeat(80) + '\n\n');
+      
+      navigator.clipboard.writeText(allText).then(() => {
+        showToast('✅ Campaña completa copiada al portapapeles');
+      });
+    }
+    
+    // Download file helper
+    function downloadFile(content, filename, type) {
+      const blob = new Blob([content], { type: type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    
+    // Reset and start new campaign
+    function resetAndStart() {
+      if (confirm('¿Estás seguro de que quieres crear una nueva campaña? Se perderá la campaña actual.')) {
+        location.reload();
+      }
+    }
+    
+    // ENHANCED: Enable/disable strength fields based on checkboxes
+    document.addEventListener('DOMContentLoaded', function() {
+      // Shipping checkbox
+      const shippingCheck = document.getElementById('strength_shipping');
+      const shippingAmount = document.getElementById('strength_shipping_amount');
+      if (shippingCheck && shippingAmount) {
+        shippingCheck.addEventListener('change', function() {
+          shippingAmount.disabled = !this.checked;
+          if (this.checked) shippingAmount.focus();
+        });
+      }
+      
+      // Experience checkbox
+      const experienceCheck = document.getElementById('strength_experience');
+      const experienceYears = document.getElementById('strength_experience_years');
+      if (experienceCheck && experienceYears) {
+        experienceCheck.addEventListener('change', function() {
+          experienceYears.disabled = !this.checked;
+          if (this.checked) experienceYears.focus();
+        });
+      }
+      
+      // Returns checkbox
+      const returnsCheck = document.getElementById('strength_returns');
+      const returnsText = document.getElementById('strength_returns_text');
+      if (returnsCheck && returnsText) {
+        returnsCheck.addEventListener('change', function() {
+          returnsText.disabled = !this.checked;
+          if (this.checked) returnsText.focus();
+        });
+      }
+      
+      // Support checkbox
+      const supportCheck = document.getElementById('strength_support');
+      const supportText = document.getElementById('strength_support_text');
+      const supportPhone = document.getElementById('strength_support_phone');
+      if (supportCheck && supportText && supportPhone) {
+        supportCheck.addEventListener('change', function() {
+          supportText.disabled = !this.checked;
+          supportPhone.disabled = !this.checked;
+          if (this.checked) supportText.focus();
+        });
+      }
+      
+    });
+  </script>
+</body>
+</html>

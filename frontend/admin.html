@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ads Engine Pro — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #0066ff;
+      --accent: #ff3366;
+      --success: #00d084;
+      --warning: #ff9500;
+      --purple: #9b59b6;
+      --bg-main: #0a0f1e;
+      --bg-card: #111827;
+      --bg-input: #1a2332;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #1e293b;
+      --border-light: #2d3748;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Sora',sans-serif;
+      background:var(--bg-main);
+      color:var(--text-primary);
+      min-height:100vh;
+    }
+    body::before {
+      content:''; position:fixed; inset:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size:48px 48px;
+      pointer-events:none; z-index:0;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      position:fixed; top:0; left:0; right:0; z-index:100;
+      background:rgba(10,15,30,0.95);
+      border-bottom:1px solid var(--border);
+      backdrop-filter:blur(12px);
+      height:60px; padding:0 32px;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .brand {
+      display:flex; align-items:center; gap:10px;
+      font-size:15px; font-weight:800;
+    }
+    .brand .icon {
+      width:32px; height:32px;
+      background:linear-gradient(135deg, var(--accent), var(--purple));
+      border-radius:8px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:16px;
+    }
+    .brand span {
+      background:linear-gradient(90deg, var(--accent), var(--purple));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .nav-right { display:flex; align-items:center; gap:16px; }
+    .admin-pill {
+      background:rgba(255,51,102,0.12);
+      border:1px solid rgba(255,51,102,0.3);
+      border-radius:20px; padding:5px 14px;
+      font-size:12px; font-weight:700;
+      color:var(--accent); text-transform:uppercase; letter-spacing:0.5px;
+    }
+    .btn-logout {
+      background:none; border:1px solid var(--border-light);
+      color:var(--text-muted); padding:6px 14px;
+      border-radius:8px; font-family:'Sora',sans-serif;
+      font-size:12px; cursor:pointer; transition:all 0.2s;
+    }
+    .btn-logout:hover { border-color:var(--accent); color:var(--accent); }
+
+    /* TABS */
+    .tabs {
+      position:fixed; top:60px; left:0; right:0; z-index:99;
+      background:rgba(10,15,30,0.95);
+      border-bottom:1px solid var(--border);
+      backdrop-filter:blur(12px);
+      display:flex; gap:0; padding:0 32px;
+    }
+    .tab {
+      padding:14px 20px;
+      font-size:13px; font-weight:600;
+      color:var(--text-muted);
+      cursor:pointer; border-bottom:2px solid transparent;
+      transition:all 0.2s; white-space:nowrap;
+    }
+    .tab:hover { color:var(--text-secondary); }
+    .tab.active { color:var(--text-primary); border-bottom-color:var(--accent); }
+
+    /* MAIN */
+    .main {
+      position:relative; z-index:1;
+      max-width:1200px; margin:0 auto;
+      padding:116px 24px 48px;
+    }
+
+    .tab-content { display:none; }
+    .tab-content.active { display:block; animation:fadeUp 0.3s ease-out; }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(12px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* STATS */
+    .stats-row {
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(180px,1fr));
+      gap:16px; margin-bottom:28px;
+    }
+    .stat-card {
+      background:var(--bg-card);
+      border:1px solid var(--border);
+      border-radius:16px; padding:22px;
+      transition:border-color 0.2s;
+    }
+    .stat-card:hover { border-color:var(--border-light); }
+    .stat-label {
+      font-size:11px; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.5px;
+      color:var(--text-muted); margin-bottom:10px;
+    }
+    .stat-value {
+      font-size:34px; font-weight:800;
+      font-family:'JetBrains Mono',monospace;
+      letter-spacing:-1px; line-height:1;
+    }
+    .stat-value.red    { color:var(--accent); }
+    .stat-value.green  { color:var(--success); }
+    .stat-value.blue   { color:var(--primary); }
+    .stat-value.orange { color:var(--warning); }
+    .stat-sub { font-size:12px; color:var(--text-muted); margin-top:6px; }
+
+    /* SECTION */
+    .section-header {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:16px;
+    }
+    .section-title {
+      font-size:15px; font-weight:700;
+      display:flex; align-items:center; gap:8px;
+    }
+    .btn-primary {
+      padding:10px 20px;
+      background:linear-gradient(135deg, var(--primary), #0052cc);
+      color:white; border:none; border-radius:10px;
+      font-family:'Sora',sans-serif; font-size:13px; font-weight:700;
+      cursor:pointer; transition:transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-primary:hover {
+      transform:translateY(-1px);
+      box-shadow:0 8px 20px rgba(0,102,255,0.3);
+    }
+
+    /* TABLE */
+    .data-table {
+      background:var(--bg-card);
+      border:1px solid var(--border);
+      border-radius:16px; overflow:hidden;
+      margin-bottom:28px;
+    }
+    .table-head {
+      display:grid; padding:13px 24px;
+      border-bottom:1px solid var(--border);
+      font-size:11px; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.5px;
+      color:var(--text-muted);
+    }
+    .table-head.cols-users   { grid-template-columns:2.5fr 1fr 1fr 1fr 140px; }
+    .table-head.cols-resellers { grid-template-columns:2fr 1fr 1fr 100px; }
+
+    .table-row {
+      display:grid; padding:15px 24px;
+      border-bottom:1px solid var(--border);
+      align-items:center; font-size:13px;
+      transition:background 0.15s;
+    }
+    .table-row:last-child { border-bottom:none; }
+    .table-row:hover { background:rgba(255,255,255,0.02); }
+    .table-row.cols-users     { grid-template-columns:2.5fr 1fr 1fr 1fr 140px; }
+    .table-row.cols-resellers { grid-template-columns:2fr 1fr 1fr 100px; }
+
+    .cell-email {
+      display:flex; align-items:center; gap:10px;
+      font-weight:600;
+    }
+    .avatar {
+      width:28px; height:28px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:11px; font-weight:700; flex-shrink:0;
+    }
+    .avatar.customer { background:linear-gradient(135deg, var(--primary), #0052cc); }
+    .avatar.reseller { background:linear-gradient(135deg, var(--warning), var(--accent)); }
+    .avatar.admin    { background:linear-gradient(135deg, var(--accent), var(--purple)); }
+
+    .badge {
+      display:inline-flex; padding:3px 10px;
+      border-radius:20px; font-size:11px; font-weight:700;
+    }
+    .badge.starter { background:rgba(0,102,255,0.12); color:var(--primary);  border:1px solid rgba(0,102,255,0.25); }
+    .badge.pro     { background:rgba(0,208,132,0.12); color:var(--success);  border:1px solid rgba(0,208,132,0.25); }
+    .badge.agency  { background:rgba(255,149,0,0.12); color:var(--warning);  border:1px solid rgba(255,149,0,0.25); }
+    .badge.reseller-badge { background:rgba(255,149,0,0.12); color:var(--warning); border:1px solid rgba(255,149,0,0.3); }
+    .badge.admin-badge    { background:rgba(255,51,102,0.12); color:var(--accent);  border:1px solid rgba(255,51,102,0.3); }
+
+    .credits-num {
+      font-family:'JetBrains Mono',monospace; font-weight:700;
+    }
+    .credits-num.low   { color:var(--warning); }
+    .credits-num.empty { color:var(--accent); }
+    .credits-num.ok    { color:var(--success); }
+
+    .cell-date { font-size:12px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; }
+
+    .btn-sm {
+      padding:6px 12px;
+      border-radius:7px; font-family:'Sora',sans-serif;
+      font-size:11px; font-weight:600; cursor:pointer;
+      transition:all 0.2s; border:1px solid var(--border-light);
+      background:var(--bg-input); color:var(--text-secondary);
+      margin-right:4px;
+    }
+    .btn-sm:hover { border-color:var(--success); color:var(--success); background:rgba(0,208,132,0.08); }
+    .btn-sm.danger:hover { border-color:var(--accent); color:var(--accent); background:rgba(255,51,102,0.08); }
+
+    .search-box {
+      background:var(--bg-input);
+      border:1px solid var(--border-light);
+      border-radius:10px; padding:10px 16px;
+      color:var(--text-primary); font-family:'Sora',sans-serif;
+      font-size:13px; outline:none; width:260px;
+      transition:border-color 0.2s;
+    }
+    .search-box:focus { border-color:var(--primary); }
+    .search-box::placeholder { color:var(--text-muted); }
+
+    .empty-state {
+      padding:48px; text-align:center; color:var(--text-muted);
+    }
+    .empty-state .icon { font-size:36px; opacity:0.4; margin-bottom:12px; }
+
+    /* MODAL */
+    .modal-overlay {
+      display:none; position:fixed; inset:0; z-index:1000;
+      background:rgba(0,0,0,0.75); backdrop-filter:blur(4px);
+      align-items:center; justify-content:center;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal {
+      background:var(--bg-card);
+      border:1px solid var(--border-light);
+      border-radius:20px; padding:32px;
+      width:100%; max-width:440px;
+      animation:fadeUp 0.25s ease-out;
+    }
+    .modal h3 { font-size:18px; font-weight:800; margin-bottom:6px; }
+    .modal .sub { font-size:13px; color:var(--text-secondary); margin-bottom:24px; }
+    .modal label {
+      display:block; font-size:12px; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.5px;
+      color:var(--text-muted); margin-bottom:8px;
+    }
+    .modal input, .modal select {
+      width:100%; background:var(--bg-input);
+      border:1px solid var(--border-light);
+      border-radius:10px; padding:12px 14px;
+      color:var(--text-primary); font-family:'Sora',sans-serif;
+      font-size:14px; outline:none; margin-bottom:16px;
+      transition:border-color 0.2s;
+    }
+    .modal input:focus, .modal select:focus { border-color:var(--primary); }
+    .modal-actions { display:flex; gap:12px; }
+    .btn-confirm {
+      flex:1; padding:13px;
+      background:linear-gradient(135deg, var(--success), #00b871);
+      color:white; border:none; border-radius:10px;
+      font-family:'Sora',sans-serif; font-size:14px; font-weight:700;
+      cursor:pointer;
+    }
+    .btn-cancel {
+      padding:13px 20px;
+      background:var(--bg-input); border:1px solid var(--border-light);
+      color:var(--text-secondary); border-radius:10px;
+      font-family:'Sora',sans-serif; font-size:14px; cursor:pointer;
+    }
+
+    /* TOAST */
+    .toast {
+      position:fixed; bottom:24px; right:24px; z-index:2000;
+      background:var(--bg-card); border:1px solid var(--border-light);
+      border-radius:12px; padding:14px 20px;
+      font-size:13px; font-weight:600;
+      transform:translateY(80px); opacity:0;
+      transition:all 0.3s;
+      box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    }
+    .toast.show { transform:translateY(0); opacity:1; }
+
+    @media(max-width:700px) {
+      .table-head.cols-users, .table-row.cols-users {
+        grid-template-columns:2fr 1fr 120px;
+      }
+      .table-head.cols-users > :nth-child(2),
+      .table-head.cols-users > :nth-child(4),
+      .table-row.cols-users > :nth-child(2),
+      .table-row.cols-users > :nth-child(4) { display:none; }
+      .tabs { overflow-x:auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="brand">
+      <div class="icon">👑</div>
+      <div>Ads Engine <span>Pro · Admin</span></div>
+    </div>
+    <div class="nav-right">
+      <div class="admin-pill">👑 Francisco Blanco</div>
+      <button class="btn-logout" onclick="logout()">Salir</button>
+    </div>
+  </nav>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('overview')">📊 Resumen</div>
+    <div class="tab" onclick="switchTab('users')">👥 Clientes</div>
+    <div class="tab" onclick="switchTab('resellers')">💼 Resellers</div>
+  </div>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- TAB: RESUMEN -->
+    <div class="tab-content active" id="tab-overview">
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Clientes totales</div>
+          <div class="stat-value blue" id="ov-clients">—</div>
+          <div class="stat-sub">cuentas activas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Resellers</div>
+          <div class="stat-value orange" id="ov-resellers">—</div>
+          <div class="stat-sub">socios activos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Campañas generadas</div>
+          <div class="stat-value green" id="ov-campaigns">—</div>
+          <div class="stat-sub">en total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Ingresos estimados</div>
+          <div class="stat-value red" id="ov-revenue">—</div>
+          <div class="stat-sub">basado en planes vendidos</div>
+        </div>
+      </div>
+
+      <!-- Últimos clientes -->
+      <div class="section-header">
+        <div class="section-title">🕐 Últimos clientes registrados</div>
+      </div>
+      <div class="data-table">
+        <div class="table-head cols-users">
+          <div>Email</div>
+          <div>Plan</div>
+          <div>Créditos</div>
+          <div>Alta</div>
+          <div>Acciones</div>
+        </div>
+        <div id="recent-users-body">
+          <div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CLIENTES -->
+    <div class="tab-content" id="tab-users">
+      <div class="section-header">
+        <div class="section-title">👥 Todos los clientes</div>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <input class="search-box" type="text" placeholder="🔍 Buscar por email..." oninput="filterUsers(this.value)">
+          <button class="btn-primary" onclick="openNewUserModal()">+ Nuevo cliente</button>
+        </div>
+      </div>
+      <div class="data-table">
+        <div class="table-head cols-users">
+          <div>Email</div>
+          <div>Plan</div>
+          <div>Créditos</div>
+          <div>Alta</div>
+          <div>Acciones</div>
+        </div>
+        <div id="users-body">
+          <div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: RESELLERS -->
+    <div class="tab-content" id="tab-resellers">
+      <div class="section-header">
+        <div class="section-title">💼 Resellers</div>
+        <button class="btn-primary" onclick="openNewResellerModal()">+ Nuevo reseller</button>
+      </div>
+      <div class="data-table">
+        <div class="table-head cols-resellers">
+          <div>Email</div>
+          <div>Clientes</div>
+          <div>Alta</div>
+          <div>Acciones</div>
+        </div>
+        <div id="resellers-body">
+          <div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal: añadir créditos -->
+  <div class="modal-overlay" id="modal-credits">
+    <div class="modal">
+      <h3>➕ Añadir créditos</h3>
+      <div class="sub" id="modal-credits-sub">—</div>
+      <input type="hidden" id="mc-user-id">
+      <label>Créditos a añadir</label>
+      <input type="number" id="mc-amount" value="10" min="1" max="500">
+      <div class="modal-actions">
+        <button class="btn-confirm" onclick="confirmCredits()">✅ Confirmar</button>
+        <button class="btn-cancel" onclick="closeModal('modal-credits')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: nuevo cliente -->
+  <div class="modal-overlay" id="modal-new-user">
+    <div class="modal">
+      <h3>👤 Nuevo cliente</h3>
+      <div class="sub">Crea acceso directo para un cliente.</div>
+      <label>Email</label>
+      <input type="email" id="nu-email" placeholder="cliente@empresa.com">
+      <label>Contraseña</label>
+      <input type="password" id="nu-password" placeholder="Mínimo 8 caracteres">
+      <label>Plan</label>
+      <select id="nu-plan">
+        <option value="starter">Starter — 10 campañas — 249€</option>
+        <option value="pro">Pro — 30 campañas — 590€</option>
+        <option value="agency">Agency — 100 campañas — 1.490€</option>
+      </select>
+      <label>Asignar a reseller (opcional)</label>
+      <select id="nu-reseller">
+        <option value="">— Sin reseller (directo) —</option>
+      </select>
+      <div class="modal-actions">
+        <button class="btn-confirm" onclick="confirmNewUser()">✅ Crear</button>
+        <button class="btn-cancel" onclick="closeModal('modal-new-user')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: nuevo reseller -->
+  <div class="modal-overlay" id="modal-new-reseller">
+    <div class="modal">
+      <h3>💼 Nuevo reseller</h3>
+      <div class="sub">Tu socio podrá gestionar sus propios clientes.</div>
+      <label>Email del reseller</label>
+      <input type="email" id="nr-email" placeholder="socio@empresa.com">
+      <label>Contraseña</label>
+      <input type="password" id="nr-password" placeholder="Mínimo 8 caracteres">
+      <div class="modal-actions">
+        <button class="btn-confirm" onclick="confirmNewReseller()">✅ Crear reseller</button>
+        <button class="btn-cancel" onclick="closeModal('modal-new-reseller')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ============================================================
+    // AUTH — solo admin
+    // ============================================================
+    const AUTH_TOKEN   = localStorage.getItem('ads_engine_token');
+    const CURRENT_USER = JSON.parse(localStorage.getItem('ads_engine_user') || '{}');
+
+    if (!AUTH_TOKEN) { window.location.href = 'login.html'; }
+    if (CURRENT_USER.role !== 'admin') { window.location.href = 'dashboard.html'; }
+
+    const SERVER_URL = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000' : '';
+
+    const PLAN_CREDITS = { starter:10, pro:30, agency:100 };
+    const PLAN_PRICE   = { starter:249, pro:590, agency:1490 };
+
+    let allUsers     = [];
+    let allResellers = [];
+
+    // ============================================================
+    // TABS
+    // ============================================================
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('tab-' + name).classList.add('active');
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAll();
+    });
+
+    async function loadAll() {
+      try {
+        const res = await fetch(`${SERVER_URL}/api/admin/overview`, {
+          headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
+        });
+        if (res.status === 401) { logout(); return; }
+        if (!res.ok) throw new Error();
+
+        const data = await res.json();
+        renderOverview(data);
+        allUsers     = data.users     || [];
+        allResellers = data.resellers || [];
+        renderUsers(allUsers, 'users-body');
+        renderUsers(allUsers.slice(0,5), 'recent-users-body');
+        renderResellers(allResellers);
+        populateResellerSelect();
+
+      } catch(e) {
+        showToast('❌ Error al conectar con el servidor');
+      }
+    }
+
+    // ============================================================
+    // OVERVIEW
+    // ============================================================
+    function renderOverview(data) {
+      document.getElementById('ov-clients').textContent   = data.total_clients   || 0;
+      document.getElementById('ov-resellers').textContent = data.total_resellers || 0;
+      document.getElementById('ov-campaigns').textContent = data.total_campaigns || 0;
+
+      // Ingresos estimados
+      const revenue = (data.users || []).reduce((sum, u) => {
+        return sum + (PLAN_PRICE[(u.plan_type||'starter').toLowerCase()] || 0);
+      }, 0);
+      document.getElementById('ov-revenue').textContent = revenue.toLocaleString('es-ES') + '€';
+    }
+
+    // ============================================================
+    // USERS TABLE
+    // ============================================================
+    function renderUsers(users, targetId) {
+      const body = document.getElementById(targetId);
+      if (!users.length) {
+        body.innerHTML = `<div class="empty-state"><div class="icon">👤</div><p>Sin clientes aún.</p></div>`;
+        return;
+      }
+      body.innerHTML = '';
+      users.forEach(u => {
+        const plan    = (u.plan_type||'starter').toLowerCase();
+        const credits = u.credits_remaining ?? 0;
+        const credClass = credits === 0 ? 'empty' : credits <= 3 ? 'low' : 'ok';
+        const date = new Date(u.created_at).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
+        const initials = (u.email||'?')[0].toUpperCase();
+
+        const row = document.createElement('div');
+        row.className = 'table-row cols-users';
+        row.dataset.email = u.email.toLowerCase();
+        row.innerHTML = `
+          <div class="cell-email">
+            <span class="avatar customer">${initials}</span>${u.email}
+          </div>
+          <div><span class="badge ${plan}">${plan.charAt(0).toUpperCase()+plan.slice(1)}</span></div>
+          <div><span class="credits-num ${credClass}">${credits}</span></div>
+          <div class="cell-date">${date}</div>
+          <div>
+            <button class="btn-sm" onclick="openCreditsModal(${u.id},'${u.email}')">+ Créditos</button>
+            <button class="btn-sm danger" onclick="deleteUser(${u.id},'${u.email}')">Borrar</button>
+          </div>
+        `;
+        body.appendChild(row);
+      });
+    }
+
+    function filterUsers(query) {
+      const q = query.toLowerCase();
+      const filtered = allUsers.filter(u => u.email.toLowerCase().includes(q));
+      renderUsers(filtered, 'users-body');
+    }
+
+    // ============================================================
+    // RESELLERS TABLE
+    // ============================================================
+    function renderResellers(resellers) {
+      const body = document.getElementById('resellers-body');
+      if (!resellers.length) {
+        body.innerHTML = `<div class="empty-state"><div class="icon">💼</div><p>Sin resellers aún.</p></div>`;
+        return;
+      }
+      body.innerHTML = '';
+      resellers.forEach(r => {
+        const date = new Date(r.created_at).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
+        const initials = (r.email||'?')[0].toUpperCase();
+        const row = document.createElement('div');
+        row.className = 'table-row cols-resellers';
+        row.innerHTML = `
+          <div class="cell-email">
+            <span class="avatar reseller">${initials}</span>${r.email}
+          </div>
+          <div><strong>${r.client_count || 0}</strong> clientes</div>
+          <div class="cell-date">${date}</div>
+          <div>
+            <button class="btn-sm danger" onclick="deleteUser(${r.id},'${r.email}')">Borrar</button>
+          </div>
+        `;
+        body.appendChild(row);
+      });
+    }
+
+    function populateResellerSelect() {
+      const sel = document.getElementById('nu-reseller');
+      allResellers.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.textContent = r.email;
+        sel.appendChild(opt);
+      });
+    }
+
+    // ============================================================
+    // MODALS
+    // ============================================================
+    function openCreditsModal(userId, email) {
+      document.getElementById('mc-user-id').value = userId;
+      document.getElementById('modal-credits-sub').textContent = `Cliente: ${email}`;
+      document.getElementById('mc-amount').value = 10;
+      document.getElementById('modal-credits').classList.add('open');
+    }
+
+    async function confirmCredits() {
+      const userId = document.getElementById('mc-user-id').value;
+      const amount = parseInt(document.getElementById('mc-amount').value);
+      if (!amount || amount < 1) { showToast('⚠️ Introduce un número válido'); return; }
+
+      const res = await fetch(`${SERVER_URL}/api/admin/credits/add`, {
+        method:'POST',
+        headers:{'Authorization':`Bearer ${AUTH_TOKEN}`,'Content-Type':'application/json'},
+        body: JSON.stringify({ user_id: userId, credits: amount })
+      });
+      if (res.ok) {
+        closeModal('modal-credits');
+        showToast(`✅ ${amount} créditos añadidos`);
+        loadAll();
+      } else { showToast('❌ Error al añadir créditos'); }
+    }
+
+    function openNewUserModal() {
+      document.getElementById('nu-email').value = '';
+      document.getElementById('nu-password').value = '';
+      document.getElementById('modal-new-user').classList.add('open');
+    }
+
+    async function confirmNewUser() {
+      const email    = document.getElementById('nu-email').value.trim();
+      const password = document.getElementById('nu-password').value;
+      const plan     = document.getElementById('nu-plan').value;
+      const reseller = document.getElementById('nu-reseller').value;
+
+      if (!email || !password || password.length < 8) {
+        showToast('⚠️ Email y contraseña requeridos (mín. 8 caracteres)'); return;
+      }
+
+      const res = await fetch(`${SERVER_URL}/api/admin/users/create`, {
+        method:'POST',
+        headers:{'Authorization':`Bearer ${AUTH_TOKEN}`,'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password, plan_type: plan, role:'customer', reseller_id: reseller || null })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        closeModal('modal-new-user');
+        showToast(`✅ Cliente ${email} creado`);
+        loadAll();
+      } else { showToast('❌ ' + (data.error || 'Error al crear cliente')); }
+    }
+
+    function openNewResellerModal() {
+      document.getElementById('nr-email').value = '';
+      document.getElementById('nr-password').value = '';
+      document.getElementById('modal-new-reseller').classList.add('open');
+    }
+
+    async function confirmNewReseller() {
+      const email    = document.getElementById('nr-email').value.trim();
+      const password = document.getElementById('nr-password').value;
+
+      if (!email || !password || password.length < 8) {
+        showToast('⚠️ Email y contraseña requeridos (mín. 8 caracteres)'); return;
+      }
+
+      const res = await fetch(`${SERVER_URL}/api/admin/users/create`, {
+        method:'POST',
+        headers:{'Authorization':`Bearer ${AUTH_TOKEN}`,'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password, plan_type: null, role:'reseller' })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        closeModal('modal-new-reseller');
+        showToast(`✅ Reseller ${email} creado`);
+        loadAll();
+      } else { showToast('❌ ' + (data.error || 'Error al crear reseller')); }
+    }
+
+    async function deleteUser(userId, email) {
+      if (!confirm(`¿Borrar la cuenta de ${email}? Esta acción no se puede deshacer.`)) return;
+      const res = await fetch(`${SERVER_URL}/api/admin/users/${userId}`, {
+        method:'DELETE',
+        headers:{'Authorization':`Bearer ${AUTH_TOKEN}`}
+      });
+      if (res.ok) { showToast(`🗑️ ${email} eliminado`); loadAll(); }
+      else { showToast('❌ Error al eliminar'); }
+    }
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function logout() {
+      localStorage.removeItem('ads_engine_token');
+      localStorage.removeItem('ads_engine_user');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>

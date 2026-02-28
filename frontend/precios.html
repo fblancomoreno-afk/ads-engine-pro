@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planes y Precios — Ads Engine Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #0066ff;
+      --accent: #ff3366;
+      --success: #00d084;
+      --warning: #ff9500;
+      --bg-main: #0a0f1e;
+      --bg-card: #111827;
+      --bg-input: #1a2332;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #1e293b;
+      --border-light: #2d3748;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Sora',sans-serif;
+      background:var(--bg-main);
+      color:var(--text-primary);
+      min-height:100vh;
+      padding:64px 24px;
+    }
+    body::before {
+      content:''; position:fixed; inset:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size:48px 48px;
+      pointer-events:none; z-index:0;
+    }
+    .bg-glow { position:fixed; inset:0; pointer-events:none; z-index:0; }
+    .bg-glow::before {
+      content:''; position:absolute;
+      width:600px; height:600px;
+      background:radial-gradient(circle, rgba(0,102,255,0.1) 0%, transparent 70%);
+      top:-200px; right:-100px;
+    }
+    .bg-glow::after {
+      content:''; position:absolute;
+      width:400px; height:400px;
+      background:radial-gradient(circle, rgba(0,208,132,0.07) 0%, transparent 70%);
+      bottom:-100px; left:-100px;
+    }
+
+    .wrapper {
+      position:relative; z-index:1;
+      max-width:1040px; margin:0 auto;
+    }
+
+    /* HEADER */
+    .header { text-align:center; margin-bottom:56px; animation:fadeUp 0.5s ease-out; }
+    .eyebrow {
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(0,102,255,0.1); border:1px solid rgba(0,102,255,0.25);
+      border-radius:20px; padding:6px 16px;
+      font-size:12px; font-weight:700; color:var(--primary);
+      text-transform:uppercase; letter-spacing:0.5px; margin-bottom:20px;
+    }
+    .header h1 {
+      font-size:clamp(30px,5vw,52px); font-weight:800;
+      letter-spacing:-1px; line-height:1.1; margin-bottom:16px;
+    }
+    .header h1 span {
+      background:linear-gradient(90deg, var(--primary), var(--success));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .header p {
+      font-size:16px; color:var(--text-secondary);
+      max-width:540px; margin:0 auto; line-height:1.6;
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* WHAT IT DOES — franja de características */
+    .features-strip {
+      display:flex; flex-wrap:wrap; justify-content:center; gap:10px;
+      margin-bottom:48px;
+      animation:fadeUp 0.5s ease-out 0.05s both;
+    }
+    .feat-pill {
+      display:inline-flex; align-items:center; gap:6px;
+      background:var(--bg-card); border:1px solid var(--border);
+      border-radius:20px; padding:7px 14px;
+      font-size:12px; font-weight:600; color:var(--text-secondary);
+    }
+    .feat-pill .dot { color:var(--success); font-size:14px; }
+
+    /* PLANS */
+    .plans {
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(290px,1fr));
+      gap:24px; margin-bottom:40px;
+    }
+
+    .plan-card {
+      background:var(--bg-card); border:1px solid var(--border);
+      border-radius:24px; padding:32px;
+      display:flex; flex-direction:column;
+      transition:transform 0.2s, box-shadow 0.2s;
+      animation:fadeUp 0.5s ease-out both;
+    }
+    .plan-card:nth-child(1) { animation-delay:0.1s; }
+    .plan-card:nth-child(2) { animation-delay:0.2s; }
+    .plan-card:nth-child(3) { animation-delay:0.3s; }
+    .plan-card:hover { transform:translateY(-4px); box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+    .plan-card.featured {
+      border-color:var(--primary);
+      background:linear-gradient(135deg, rgba(0,102,255,0.08), rgba(0,208,132,0.05));
+      box-shadow:0 0 40px rgba(0,102,255,0.15);
+    }
+
+    .popular-tag {
+      display:inline-flex; align-items:center; gap:6px;
+      background:linear-gradient(135deg, var(--primary), var(--success));
+      color:white; border-radius:20px; padding:4px 14px;
+      font-size:11px; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.5px; margin-bottom:20px; align-self:flex-start;
+    }
+
+    .plan-name {
+      font-size:13px; font-weight:700; text-transform:uppercase;
+      letter-spacing:1px; color:var(--text-muted); margin-bottom:8px;
+    }
+    .plan-price {
+      font-size:50px; font-weight:800;
+      letter-spacing:-2px; line-height:1; margin-bottom:4px;
+    }
+    .plan-price sup {
+      font-size:20px; font-weight:700;
+      vertical-align:top; margin-top:10px; display:inline-block;
+    }
+    .plan-price-sub { font-size:13px; color:var(--text-muted); margin-bottom:20px; }
+
+    .plan-highlight {
+      background:rgba(0,208,132,0.08); border:1px solid rgba(0,208,132,0.2);
+      border-radius:8px; padding:10px 14px;
+      font-size:13px; font-weight:700; color:var(--success);
+      margin-bottom:20px; text-align:center;
+    }
+
+    .plan-divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
+
+    .plan-features { list-style:none; margin-bottom:28px; flex:1; }
+    .plan-features li {
+      display:flex; align-items:flex-start; gap:10px;
+      font-size:13px; color:var(--text-secondary); padding:6px 0;
+      line-height:1.4;
+    }
+    .plan-features li .check { color:var(--success); flex-shrink:0; margin-top:1px; }
+    .plan-features li strong { color:var(--text-primary); }
+
+    .section-label {
+      font-size:10px; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.8px; color:var(--text-muted);
+      margin:14px 0 6px; padding-left:2px;
+    }
+
+    /* BOTONES */
+    .lemon-btn {
+      display:block; width:100%; padding:15px; text-align:center;
+      border-radius:12px; font-family:'Sora',sans-serif;
+      font-size:15px; font-weight:700; cursor:pointer;
+      transition:transform 0.15s, box-shadow 0.15s;
+      text-decoration:none; border:none;
+    }
+    .lemon-btn.primary {
+      background:linear-gradient(135deg, var(--primary), #0052cc); color:white;
+    }
+    .lemon-btn.primary:hover {
+      transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,102,255,0.35);
+    }
+    .lemon-btn.outline {
+      background:transparent; border:1px solid var(--border-light); color:var(--text-secondary);
+    }
+    .lemon-btn.outline:hover { border-color:var(--primary); color:var(--primary); }
+
+    /* GARANTÍA */
+    .guarantee {
+      text-align:center; font-size:13px; color:var(--text-muted);
+      display:flex; align-items:center; justify-content:center;
+      gap:8px; margin-bottom:56px; flex-wrap:wrap;
+    }
+    .guarantee span { display:flex; align-items:center; gap:6px; }
+
+    /* FAQ */
+    .faq { max-width:660px; margin:0 auto 48px; }
+    .faq-title { font-size:22px; font-weight:800; text-align:center; margin-bottom:24px; }
+    .faq-item {
+      background:var(--bg-card); border:1px solid var(--border);
+      border-radius:12px; padding:20px 24px; margin-bottom:12px;
+    }
+    .faq-q { font-size:14px; font-weight:700; margin-bottom:8px; }
+    .faq-a { font-size:13px; color:var(--text-secondary); line-height:1.6; }
+
+    /* FOOTER */
+    .footer { text-align:center; font-size:12px; color:var(--text-muted); }
+
+    @media(max-width:600px) {
+      .plan-price { font-size:40px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <div class="wrapper">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="eyebrow">🚀 Ads Engine Pro V8</div>
+      <h1>Campañas Google Ads profesionales<br><span>generadas en minutos</span></h1>
+      <p>El motor de IA que analiza tu web, construye la campaña completa y la exporta lista para subir a Google Ads. Sin agencias. Sin esperas.</p>
+    </div>
+
+    <!-- Franja de características -->
+    <div class="features-strip">
+      <div class="feat-pill"><span class="dot">✓</span> Análisis automático de tu web con IA</div>
+      <div class="feat-pill"><span class="dot">✓</span> Hasta 5 grupos de anuncios</div>
+      <div class="feat-pill"><span class="dot">✓</span> Sin canibalización de keywords</div>
+      <div class="feat-pill"><span class="dot">✓</span> Anuncios RSA 15 titulares</div>
+      <div class="feat-pill"><span class="dot">✓</span> Sitelinks · Callouts · Snippets</div>
+      <div class="feat-pill"><span class="dot">✓</span> 258 palabras negativas</div>
+      <div class="feat-pill"><span class="dot">✓</span> Export Google Ads Editor</div>
+      <div class="feat-pill"><span class="dot">✓</span> Export Excel completo</div>
+      <div class="feat-pill"><span class="dot">✓</span> Keywords Exact · Phrase · Broad</div>
+      <div class="feat-pill"><span class="dot">✓</span> Validación automática Google Ads</div>
+    </div>
+
+    <!-- Planes -->
+    <div class="plans">
+
+      <!-- STARTER -->
+      <div class="plan-card">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price"><sup>€</sup>249</div>
+        <div class="plan-price-sub">pago único · sin renovación</div>
+        <div class="plan-highlight">10 campañas completas</div>
+        <hr class="plan-divider">
+
+        <div class="section-label">El motor incluye</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Análisis automático de tu web con IA</li>
+          <li><span class="check">✓</span> Hasta 5 grupos de anuncios sin canibalización</li>
+          <li><span class="check">✓</span> Anuncios RSA — 15 titulares y 4 descripciones</li>
+          <li><span class="check">✓</span> Sitelinks, Callouts y Snippets estructurados</li>
+          <li><span class="check">✓</span> 258 palabras negativas profesionales</li>
+          <li><span class="check">✓</span> Keywords por intención: Exact, Phrase y Broad</li>
+          <li><span class="check">✓</span> Export directo a Google Ads Editor</li>
+          <li><span class="check">✓</span> Export Excel con todas las pestañas</li>
+        </ul>
+
+        <div class="section-label">Soporte</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Soporte por email</li>
+        </ul>
+
+        <!-- Día 7: sustituir href por URL real de Lemon Squeezy -->
+        <a href="https://tu-tienda.lemonsqueezy.com/checkout/starter"
+           class="lemon-btn outline" data-lemon-overlay="true">
+          Empezar con Starter →
+        </a>
+      </div>
+
+      <!-- PRO -->
+      <div class="plan-card featured">
+        <div class="popular-tag">⚡ Más popular</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price"><sup>€</sup>590</div>
+        <div class="plan-price-sub">pago único · sin renovación</div>
+        <div class="plan-highlight">30 campañas completas</div>
+        <hr class="plan-divider">
+
+        <div class="section-label">El motor incluye</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Análisis automático de tu web con IA</li>
+          <li><span class="check">✓</span> Hasta 5 grupos de anuncios sin canibalización</li>
+          <li><span class="check">✓</span> Anuncios RSA — 15 titulares y 4 descripciones</li>
+          <li><span class="check">✓</span> Sitelinks, Callouts y Snippets estructurados</li>
+          <li><span class="check">✓</span> 258 palabras negativas profesionales</li>
+          <li><span class="check">✓</span> Keywords por intención: Exact, Phrase y Broad</li>
+          <li><span class="check">✓</span> Export directo a Google Ads Editor</li>
+          <li><span class="check">✓</span> Export Excel con todas las pestañas</li>
+          <li><span class="check">✓</span> <strong>Acceso a nuevas versiones</strong></li>
+        </ul>
+
+        <div class="section-label">Soporte</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> <strong>Soporte prioritario</strong></li>
+        </ul>
+
+        <!-- Día 7: sustituir href por URL real de Lemon Squeezy -->
+        <a href="https://tu-tienda.lemonsqueezy.com/checkout/pro"
+           class="lemon-btn primary" data-lemon-overlay="true">
+          Empezar con Pro →
+        </a>
+      </div>
+
+      <!-- AGENCY -->
+      <div class="plan-card">
+        <div class="plan-name">Agency</div>
+        <div class="plan-price"><sup>€</sup>1.490</div>
+        <div class="plan-price-sub">pago único · sin renovación</div>
+        <div class="plan-highlight">100 campañas completas</div>
+        <hr class="plan-divider">
+
+        <div class="section-label">El motor incluye</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Análisis automático de tu web con IA</li>
+          <li><span class="check">✓</span> Hasta 5 grupos de anuncios sin canibalización</li>
+          <li><span class="check">✓</span> Anuncios RSA — 15 titulares y 4 descripciones</li>
+          <li><span class="check">✓</span> Sitelinks, Callouts y Snippets estructurados</li>
+          <li><span class="check">✓</span> 258 palabras negativas profesionales</li>
+          <li><span class="check">✓</span> Keywords por intención: Exact, Phrase y Broad</li>
+          <li><span class="check">✓</span> Export directo a Google Ads Editor</li>
+          <li><span class="check">✓</span> Export Excel con todas las pestañas</li>
+          <li><span class="check">✓</span> <strong>Acceso a nuevas versiones</strong></li>
+        </ul>
+
+        <div class="section-label">Soporte</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> <strong>Soporte directo con el creador</strong></li>
+          <li><span class="check">✓</span> <strong>Sesión de bienvenida incluida</strong></li>
+        </ul>
+
+        <!-- Día 7: sustituir href por URL real de Lemon Squeezy -->
+        <a href="https://tu-tienda.lemonsqueezy.com/checkout/agency"
+           class="lemon-btn outline" data-lemon-overlay="true">
+          Empezar con Agency →
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Garantía -->
+    <div class="guarantee">
+      <span>🔒 Pago 100% seguro</span>
+      <span>·</span>
+      <span>🧾 Factura automática con IVA</span>
+      <span>·</span>
+      <span>♾️ Créditos sin caducidad</span>
+    </div>
+
+    <!-- FAQ -->
+    <div class="faq">
+      <div class="faq-title">Preguntas frecuentes</div>
+
+      <div class="faq-item">
+        <div class="faq-q">¿Qué es una campaña?</div>
+        <div class="faq-a">Cada vez que generas una campaña completa de Google Ads para un negocio, se descuenta 1 campaña de tu saldo. Incluye grupos de anuncios, keywords, anuncios RSA, extensiones y palabras negativas.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">¿Caducan las campañas?</div>
+        <div class="faq-a">No. Las campañas de tu plan no caducan nunca. Las usas a tu ritmo, sin presión ni fechas límite.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">¿Puedo comprar más campañas después?</div>
+        <div class="faq-a">Sí. Cuando se te acaben puedes comprar otro plan y las campañas nuevas se suman a las que te queden.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">¿Recibiré factura?</div>
+        <div class="faq-a">Sí. La factura se genera automáticamente al pagar, con todos los datos fiscales correctos e IVA incluido.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">¿Necesito conocimientos técnicos?</div>
+        <div class="faq-a">No. Solo introduces la URL de tu web, rellenas un formulario sencillo y el motor genera la campaña completa. En pocos minutos tienes todo listo para subir a Google Ads.</div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>© 2025 Ads Engine Pro · Todos los derechos reservados</p>
+    </div>
+
+  </div>
+
+  <!--
+    LEMON SQUEEZY EMBED SCRIPT
+    Día 7: descomentar cuando tengas tu cuenta Lemon Squeezy activa
+    <script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
+  -->
+
+</body>
+</html>

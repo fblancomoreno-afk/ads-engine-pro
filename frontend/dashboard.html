@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ads Engine Pro — Mi Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #0066ff;
+      --primary-dark: #0052cc;
+      --accent: #ff3366;
+      --success: #00d084;
+      --warning: #ff9500;
+      --bg-main: #0a0f1e;
+      --bg-card: #111827;
+      --bg-input: #1a2332;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #1e293b;
+      --border-light: #2d3748;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg-main);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Glow */
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .bg-glow::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0,102,255,0.08) 0%, transparent 70%);
+      top: -100px; right: -100px;
+    }
+    .bg-glow::after {
+      content: '';
+      position: absolute;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(0,208,132,0.06) 0%, transparent 70%);
+      bottom: -100px; left: -100px;
+    }
+
+    /* Top navbar */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(10,15,30,0.92);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+
+    .navbar-brand .icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .navbar-brand span {
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .user-pill .dot {
+      width: 8px; height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+    }
+
+    .btn-logout {
+      background: none;
+      border: 1px solid var(--border-light);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-family: 'Sora', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-logout:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Main content */
+    .main {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 88px 24px 48px;
+    }
+
+    /* Welcome */
+    .welcome {
+      margin-bottom: 36px;
+      animation: fadeUp 0.5s ease-out;
+    }
+
+    .welcome h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .welcome p {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+      animation: fadeUp 0.5s ease-out 0.1s both;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      transition: border-color 0.2s;
+    }
+
+    .stat-card:hover { border-color: var(--border-light); }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-value.green  { color: var(--success); }
+    .stat-value.blue   { color: var(--primary); }
+    .stat-value.orange { color: var(--warning); }
+
+    .stat-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Credits bar */
+    .credits-bar-wrap {
+      margin-top: 12px;
+    }
+
+    .credits-bar-bg {
+      background: var(--bg-input);
+      border-radius: 4px;
+      height: 6px;
+      overflow: hidden;
+    }
+
+    .credits-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--success));
+      transition: width 0.8s ease;
+    }
+
+    /* CTA card - generate campaign */
+    .cta-card {
+      background: linear-gradient(135deg, rgba(0,102,255,0.12), rgba(0,208,132,0.08));
+      border: 1px solid rgba(0,102,255,0.3);
+      border-radius: 20px;
+      padding: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 28px;
+      animation: fadeUp 0.5s ease-out 0.2s both;
+    }
+
+    .cta-text h2 {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .cta-text p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .btn-generate {
+      flex-shrink: 0;
+      padding: 16px 32px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-generate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,102,255,0.35);
+    }
+
+    .btn-generate:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* No credits warning */
+    .no-credits-warn {
+      display: none;
+      background: rgba(255,51,102,0.08);
+      border: 1px solid rgba(255,51,102,0.25);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 13px;
+      color: #ff6688;
+      margin-top: 12px;
+    }
+
+    /* History section */
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: fadeUp 0.5s ease-out 0.3s both;
+    }
+
+    .history-table {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      animation: fadeUp 0.5s ease-out 0.35s both;
+    }
+
+    .history-header {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .history-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      transition: background 0.15s;
+      align-items: center;
+    }
+
+    .history-row:last-child { border-bottom: none; }
+    .history-row:hover { background: rgba(255,255,255,0.02); }
+
+    .history-row .campaign-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-row .campaign-name .icon {
+      font-size: 16px;
+    }
+
+    .history-row .date {
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge.generated {
+      background: rgba(0,208,132,0.12);
+      color: var(--success);
+      border: 1px solid rgba(0,208,132,0.25);
+    }
+
+    .empty-state {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-state .icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+    }
+
+    /* Plan badge */
+    .plan-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0,102,255,0.12);
+      border: 1px solid rgba(0,102,255,0.25);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, var(--border) 25%, var(--border-light) 50%, var(--border) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 6px;
+      height: 16px;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    @media (max-width: 600px) {
+      .cta-card { flex-direction: column; }
+      .history-header, .history-row { grid-template-columns: 1fr 1fr; }
+      .history-header > :last-child,
+      .history-row > :last-child { display: none; }
+      .navbar-brand .icon { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <div class="icon">🚀</div>
+      <div>Ads Engine <span>Pro</span></div>
+    </div>
+    <div class="navbar-right">
+      <div class="user-pill">
+        <div class="dot"></div>
+        <span id="nav-email">Cargando...</span>
+      </div>
+      <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Welcome -->
+    <div class="welcome">
+      <h1>Hola, <span id="welcome-name" style="color: var(--primary);">...</span> 👋</h1>
+      <p>Panel de control · <span id="welcome-date"></span></p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Campañas disponibles</div>
+        <div class="stat-value green" id="stat-credits">—</div>
+        <div class="stat-sub" id="stat-plan-sub">Cargando plan...</div>
+        <div class="credits-bar-wrap" id="credits-bar-wrap" style="display:none;">
+          <div class="credits-bar-bg">
+            <div class="credits-bar-fill" id="credits-bar-fill" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Tu plan</div>
+        <div style="margin-top:4px;" id="stat-plan-badge">
+          <div class="skeleton" style="width:80px; height:26px;"></div>
+        </div>
+        <div class="stat-sub" style="margin-top:10px;" id="stat-plan-desc">—</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Campañas generadas</div>
+        <div class="stat-value blue" id="stat-total">—</div>
+        <div class="stat-sub">en total en tu cuenta</div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-card">
+      <div class="cta-text">
+        <h2>🎯 Generar nueva campaña</h2>
+        <p>Accede al motor V8 y crea una campaña profesional de Google Ads<br>en menos de 60 segundos con análisis automático de tu web.</p>
+        <div class="no-credits-warn" id="no-credits-warn">
+          ⚠️ Has agotado tus campañas. Contacta con tu gestor para ampliar el plan.
+        </div>
+      </div>
+      <button class="btn-generate" id="btn-generate" onclick="goToEngine()">
+        ✨ Abrir generador →
+      </button>
+    </div>
+
+    <!-- History -->
+    <div class="section-title">
+      📋 Historial de campañas
+    </div>
+
+    <div class="history-table" id="history-table">
+      <div class="history-header">
+        <div>Campaña</div>
+        <div>Fecha</div>
+        <div>Estado</div>
+      </div>
+      <div class="empty-state" id="history-empty">
+        <div class="icon">📭</div>
+        <p>Cargando historial...</p>
+      </div>
+      <div id="history-rows"></div>
+    </div>
+
+  </main>
+
+  <script>
+    // ============================================================
+    // AUTH CHECK
+    // ============================================================
+    const AUTH_TOKEN = localStorage.getItem('ads_engine_token');
+    const CURRENT_USER = JSON.parse(localStorage.getItem('ads_engine_user') || '{}');
+
+    if (!AUTH_TOKEN) {
+      window.location.href = 'login.html';
+    }
+
+    const SERVER_URL = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000'
+      : '';
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Fecha de hoy
+      const now = new Date();
+      document.getElementById('welcome-date').textContent = now.toLocaleDateString('es-ES', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+
+      // Nombre del usuario
+      const email = CURRENT_USER.email || '';
+      const name = email.split('@')[0] || 'Usuario';
+      document.getElementById('welcome-name').textContent = name;
+      document.getElementById('nav-email').textContent = email;
+
+      // Cargar datos del servidor
+      loadDashboard();
+    });
+
+    // ============================================================
+    // LOAD DASHBOARD DATA
+    // ============================================================
+    async function loadDashboard() {
+      try {
+        // Cargar créditos y plan
+        const creditsRes = await fetch(`${SERVER_URL}/api/credits/balance`, {
+          headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
+        });
+
+        if (creditsRes.status === 401) {
+          logout();
+          return;
+        }
+
+        if (creditsRes.ok) {
+          const data = await creditsRes.json();
+          renderCredits(data);
+        }
+
+        // Cargar historial de campañas
+        const historyRes = await fetch(`${SERVER_URL}/api/campaigns/my`, {
+          headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
+        });
+
+        if (historyRes.ok) {
+          const history = await historyRes.json();
+          renderHistory(history);
+        }
+
+      } catch (err) {
+        console.error('Error loading dashboard:', err);
+        document.getElementById('history-empty').innerHTML = `
+          <div class="icon">⚠️</div>
+          <p>Error al conectar con el servidor. Inténtalo de nuevo.</p>
+        `;
+      }
+    }
+
+    // ============================================================
+    // RENDER CREDITS
+    // ============================================================
+    const PLAN_CONFIG = {
+      starter: { label: 'Starter', total: 10,  desc: '10 campañas incluidas', color: '#0066ff' },
+      pro:     { label: 'Pro',     total: 30,  desc: '30 campañas incluidas', color: '#00d084' },
+      agency:  { label: 'Agency',  total: 100, desc: '100 campañas incluidas', color: '#ff9500' },
+    };
+
+    function renderCredits(data) {
+      const isAdmin = data.is_admin;
+      const credits = data.credits_remaining;
+      const planKey = (data.plan_type || 'starter').toLowerCase();
+      const plan = PLAN_CONFIG[planKey] || PLAN_CONFIG.starter;
+
+      // Stat: créditos
+      const credEl = document.getElementById('stat-credits');
+      credEl.textContent = isAdmin ? '∞' : credits;
+      if (!isAdmin && credits <= 2) credEl.style.color = 'var(--warning)';
+
+      // Sub
+      document.getElementById('stat-plan-sub').textContent = isAdmin
+        ? 'Acceso ilimitado (Admin)'
+        : `de ${plan.total} campañas del plan`;
+
+      // Barra de progreso (solo clientes)
+      if (!isAdmin) {
+        const used = plan.total - credits;
+        const pct = Math.max(0, Math.min(100, (credits / plan.total) * 100));
+        document.getElementById('credits-bar-wrap').style.display = 'block';
+        document.getElementById('credits-bar-fill').style.width = pct + '%';
+        if (pct < 20) {
+          document.getElementById('credits-bar-fill').style.background = 'var(--accent)';
+        }
+      }
+
+      // Badge de plan
+      document.getElementById('stat-plan-badge').innerHTML = `
+        <div class="plan-tag" style="color:${plan.color}; border-color:${plan.color}33; background:${plan.color}18;">
+          ${isAdmin ? '👑 Admin' : '⚡ ' + plan.label}
+        </div>
+      `;
+      document.getElementById('stat-plan-desc').textContent = isAdmin
+        ? 'Acceso completo a la plataforma'
+        : plan.desc;
+
+      // Botón de generar
+      if (!isAdmin && credits <= 0) {
+        document.getElementById('btn-generate').disabled = true;
+        document.getElementById('no-credits-warn').style.display = 'block';
+      }
+    }
+
+    // ============================================================
+    // RENDER HISTORY
+    // ============================================================
+    function renderHistory(campaigns) {
+      const totalEl = document.getElementById('stat-total');
+      totalEl.textContent = campaigns.length || 0;
+
+      const emptyEl = document.getElementById('history-empty');
+      const rowsEl  = document.getElementById('history-rows');
+
+      if (!campaigns || campaigns.length === 0) {
+        emptyEl.innerHTML = `
+          <div class="icon">📭</div>
+          <p>Aún no has generado ninguna campaña.<br>¡Pulsa el botón de arriba para empezar!</p>
+        `;
+        return;
+      }
+
+      emptyEl.style.display = 'none';
+
+      campaigns.forEach(c => {
+        const date = new Date(c.created_at).toLocaleDateString('es-ES', {
+          day: '2-digit', month: '2-digit', year: 'numeric'
+        });
+        const time = new Date(c.created_at).toLocaleTimeString('es-ES', {
+          hour: '2-digit', minute: '2-digit'
+        });
+
+        const row = document.createElement('div');
+        row.className = 'history-row';
+        row.innerHTML = `
+          <div class="campaign-name">
+            <span class="icon">📊</span>
+            Campaña #${c.id || '—'}
+          </div>
+          <div class="date">${date} ${time}</div>
+          <div><span class="badge generated">✓ Generada</span></div>
+        `;
+        rowsEl.appendChild(row);
+      });
+    }
+
+    // ============================================================
+    // ACTIONS
+    // ============================================================
+    function goToEngine() {
+      window.location.href = 'ADS_ENGINE_PRO_V8_CONNECTED.html';
+    }
+
+    function logout() {
+      localStorage.removeItem('ads_engine_token');
+      localStorage.removeItem('ads_engine_user');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>

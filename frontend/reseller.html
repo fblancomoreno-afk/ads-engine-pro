@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ads Engine Pro — Panel Reseller</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #0066ff;
+      --accent: #ff3366;
+      --success: #00d084;
+      --warning: #ff9500;
+      --bg-main: #0a0f1e;
+      --bg-card: #111827;
+      --bg-input: #1a2332;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #1e293b;
+      --border-light: #2d3748;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg-main);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+    body::before {
+      content:'';
+      position:fixed; inset:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events:none; z-index:0;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      position:fixed; top:0; left:0; right:0; z-index:100;
+      background: rgba(10,15,30,0.94);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      height:60px; padding:0 32px;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .brand {
+      display:flex; align-items:center; gap:10px;
+      font-size:15px; font-weight:800;
+    }
+    .brand .icon {
+      width:32px; height:32px;
+      background: linear-gradient(135deg, var(--warning), var(--accent));
+      border-radius:8px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:16px;
+    }
+    .brand span {
+      background: linear-gradient(90deg, var(--warning), var(--accent));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .nav-right {
+      display:flex; align-items:center; gap:16px;
+    }
+    .role-pill {
+      background: rgba(255,149,0,0.12);
+      border: 1px solid rgba(255,149,0,0.3);
+      border-radius:20px; padding:5px 14px;
+      font-size:12px; font-weight:700;
+      color: var(--warning); text-transform:uppercase; letter-spacing:0.5px;
+    }
+    .btn-logout {
+      background:none; border:1px solid var(--border-light);
+      color:var(--text-muted); padding:6px 14px;
+      border-radius:8px; font-family:'Sora',sans-serif;
+      font-size:12px; cursor:pointer; transition:all 0.2s;
+    }
+    .btn-logout:hover { border-color:var(--accent); color:var(--accent); }
+
+    /* LAYOUT */
+    .main {
+      position:relative; z-index:1;
+      max-width:1100px; margin:0 auto;
+      padding:80px 24px 48px;
+    }
+
+    .page-title {
+      font-size:26px; font-weight:800; letter-spacing:-0.5px;
+      margin-bottom:6px;
+      animation: fadeUp 0.4s ease-out;
+    }
+    .page-sub {
+      font-size:13px; color:var(--text-secondary);
+      margin-bottom:32px;
+      animation: fadeUp 0.4s ease-out 0.05s both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(14px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* STATS */
+    .stats-row {
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+      gap:16px; margin-bottom:28px;
+      animation: fadeUp 0.4s ease-out 0.1s both;
+    }
+    .stat-card {
+      background:var(--bg-card);
+      border:1px solid var(--border);
+      border-radius:16px; padding:22px;
+    }
+    .stat-label {
+      font-size:11px; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.5px;
+      color:var(--text-muted); margin-bottom:10px;
+    }
+    .stat-value {
+      font-size:32px; font-weight:800;
+      font-family:'JetBrains Mono', monospace;
+      letter-spacing:-1px; line-height:1;
+    }
+    .stat-value.orange { color:var(--warning); }
+    .stat-value.green  { color:var(--success); }
+    .stat-value.blue   { color:var(--primary); }
+    .stat-sub { font-size:12px; color:var(--text-muted); margin-top:6px; }
+
+    /* SECTION */
+    .section-header {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:16px;
+      animation: fadeUp 0.4s ease-out 0.15s both;
+    }
+    .section-title {
+      font-size:15px; font-weight:700;
+      display:flex; align-items:center; gap:8px;
+    }
+    .btn-primary {
+      padding:10px 20px;
+      background: linear-gradient(135deg, var(--primary), #0052cc);
+      color:white; border:none; border-radius:10px;
+      font-family:'Sora',sans-serif; font-size:13px; font-weight:700;
+      cursor:pointer; transition:transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-primary:hover {
+      transform:translateY(-1px);
+      box-shadow: 0 8px 20px rgba(0,102,255,0.3);
+    }
+
+    /* CLIENTS TABLE */
+    .clients-table {
+      background:var(--bg-card);
+      border:1px solid var(--border);
+      border-radius:16px; overflow:hidden;
+      animation: fadeUp 0.4s ease-out 0.2s both;
+    }
+    .table-header {
+      display:grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+      padding:13px 24px;
+      border-bottom:1px solid var(--border);
+      font-size:11px; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.5px;
+      color:var(--text-muted);
+    }
+    .table-row {
+      display:grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+      padding:16px 24px;
+      border-bottom:1px solid var(--border);
+      align-items:center; font-size:13px;
+      transition:background 0.15s;
+    }
+    .table-row:last-child { border-bottom:none; }
+    .table-row:hover { background:rgba(255,255,255,0.02); }
+
+    .client-email { font-weight:600; color:var(--text-primary); }
+    .client-email .avatar {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:28px; height:28px;
+      background:linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius:50%; font-size:11px; font-weight:700;
+      margin-right:10px; flex-shrink:0;
+    }
+
+    .credits-cell {
+      display:flex; align-items:center; gap:8px;
+      font-family:'JetBrains Mono', monospace; font-size:13px;
+    }
+    .credits-dot {
+      width:8px; height:8px; border-radius:50%; flex-shrink:0;
+    }
+    .credits-dot.ok      { background:var(--success); }
+    .credits-dot.low     { background:var(--warning); }
+    .credits-dot.empty   { background:var(--accent); }
+
+    .plan-badge {
+      display:inline-flex;
+      padding:3px 10px; border-radius:20px;
+      font-size:11px; font-weight:700;
+    }
+    .plan-badge.starter { background:rgba(0,102,255,0.12); color:var(--primary); border:1px solid rgba(0,102,255,0.25); }
+    .plan-badge.pro     { background:rgba(0,208,132,0.12); color:var(--success); border:1px solid rgba(0,208,132,0.25); }
+    .plan-badge.agency  { background:rgba(255,149,0,0.12); color:var(--warning); border:1px solid rgba(255,149,0,0.25); }
+
+    .date-cell { color:var(--text-muted); font-size:12px; font-family:'JetBrains Mono',monospace; }
+
+    .btn-add-credits {
+      padding:7px 14px;
+      background:var(--bg-input);
+      border:1px solid var(--border-light);
+      color:var(--text-secondary);
+      border-radius:8px; font-family:'Sora',sans-serif;
+      font-size:12px; font-weight:600; cursor:pointer;
+      transition:all 0.2s;
+    }
+    .btn-add-credits:hover {
+      border-color:var(--success); color:var(--success);
+      background:rgba(0,208,132,0.08);
+    }
+
+    .empty-state {
+      padding:48px 24px; text-align:center; color:var(--text-muted);
+    }
+    .empty-state .icon { font-size:36px; margin-bottom:12px; opacity:0.4; }
+    .empty-state p { font-size:14px; }
+
+    /* MODAL */
+    .modal-overlay {
+      display:none;
+      position:fixed; inset:0; z-index:1000;
+      background:rgba(0,0,0,0.7);
+      backdrop-filter:blur(4px);
+      align-items:center; justify-content:center;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal {
+      background:var(--bg-card);
+      border:1px solid var(--border-light);
+      border-radius:20px; padding:32px;
+      width:100%; max-width:420px;
+      animation: fadeUp 0.25s ease-out;
+    }
+    .modal h3 { font-size:18px; font-weight:800; margin-bottom:6px; }
+    .modal .sub { font-size:13px; color:var(--text-secondary); margin-bottom:24px; }
+    .modal label {
+      display:block; font-size:12px; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.5px;
+      color:var(--text-muted); margin-bottom:8px;
+    }
+    .modal input, .modal select {
+      width:100%; background:var(--bg-input);
+      border:1px solid var(--border-light);
+      border-radius:10px; padding:12px 14px;
+      color:var(--text-primary); font-family:'Sora',sans-serif;
+      font-size:14px; outline:none; margin-bottom:18px;
+      transition:border-color 0.2s;
+    }
+    .modal input:focus, .modal select:focus { border-color:var(--primary); }
+    .modal-actions { display:flex; gap:12px; }
+    .btn-confirm {
+      flex:1; padding:13px;
+      background:linear-gradient(135deg, var(--success), #00b871);
+      color:white; border:none; border-radius:10px;
+      font-family:'Sora',sans-serif; font-size:14px; font-weight:700;
+      cursor:pointer; transition:transform 0.15s;
+    }
+    .btn-confirm:hover { transform:translateY(-1px); }
+    .btn-cancel {
+      padding:13px 20px;
+      background:var(--bg-input); border:1px solid var(--border-light);
+      color:var(--text-secondary); border-radius:10px;
+      font-family:'Sora',sans-serif; font-size:14px; cursor:pointer;
+    }
+
+    /* Toast */
+    .toast {
+      position:fixed; bottom:24px; right:24px; z-index:2000;
+      background:var(--bg-card); border:1px solid var(--border-light);
+      border-radius:12px; padding:14px 20px;
+      font-size:13px; font-weight:600;
+      transform:translateY(80px); opacity:0;
+      transition:all 0.3s ease;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .toast.show { transform:translateY(0); opacity:1; }
+
+    @media(max-width:700px) {
+      .table-header, .table-row {
+        grid-template-columns: 2fr 1fr 100px;
+      }
+      .table-header > :nth-child(2),
+      .table-header > :nth-child(4),
+      .table-row > :nth-child(2),
+      .table-row > :nth-child(4) { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="brand">
+      <div class="icon">💼</div>
+      <div>Ads Engine <span>Pro</span></div>
+    </div>
+    <div class="nav-right">
+      <div class="role-pill">⚡ Reseller</div>
+      <div style="font-size:13px; color:var(--text-secondary)" id="nav-email">—</div>
+      <button class="btn-logout" onclick="logout()">Salir</button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="page-title">Panel del Reseller 💼</div>
+    <div class="page-sub" id="reseller-sub">Cargando datos...</div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Clientes activos</div>
+        <div class="stat-value orange" id="stat-clients">—</div>
+        <div class="stat-sub">en tu cuenta</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Campañas generadas</div>
+        <div class="stat-value green" id="stat-campaigns">—</div>
+        <div class="stat-sub">por tus clientes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Créditos vendidos</div>
+        <div class="stat-value blue" id="stat-credits-sold">—</div>
+        <div class="stat-sub">campañas totales asignadas</div>
+      </div>
+    </div>
+
+    <!-- Clients list -->
+    <div class="section-header">
+      <div class="section-title">👥 Mis clientes</div>
+      <button class="btn-primary" onclick="openNewClientModal()">+ Nuevo cliente</button>
+    </div>
+
+    <div class="clients-table">
+      <div class="table-header">
+        <div>Cliente</div>
+        <div>Plan</div>
+        <div>Campañas restantes</div>
+        <div>Alta</div>
+        <div>Acción</div>
+      </div>
+      <div id="clients-body">
+        <div class="empty-state">
+          <div class="icon">⏳</div>
+          <p>Cargando clientes...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal: añadir créditos -->
+  <div class="modal-overlay" id="credits-modal">
+    <div class="modal">
+      <h3>➕ Añadir créditos</h3>
+      <div class="sub" id="credits-modal-sub">Cliente: —</div>
+      <input type="hidden" id="credits-user-id">
+      <label>Créditos a añadir</label>
+      <input type="number" id="credits-amount" min="1" max="100" value="10" placeholder="10">
+      <div class="modal-actions">
+        <button class="btn-confirm" onclick="confirmAddCredits()">✅ Confirmar</button>
+        <button class="btn-cancel" onclick="closeModal('credits-modal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: nuevo cliente -->
+  <div class="modal-overlay" id="new-client-modal">
+    <div class="modal">
+      <h3>👤 Nuevo cliente</h3>
+      <div class="sub">Crea una cuenta para tu cliente. Recibirá acceso inmediato.</div>
+      <label>Email del cliente</label>
+      <input type="email" id="new-client-email" placeholder="cliente@empresa.com">
+      <label>Contraseña inicial</label>
+      <input type="password" id="new-client-password" placeholder="Mínimo 8 caracteres">
+      <label>Plan</label>
+      <select id="new-client-plan">
+        <option value="starter">Starter — 10 campañas — 249€</option>
+        <option value="pro">Pro — 30 campañas — 590€</option>
+        <option value="agency">Agency — 100 campañas — 1.490€</option>
+      </select>
+      <div class="modal-actions">
+        <button class="btn-confirm" onclick="confirmNewClient()">✅ Crear cliente</button>
+        <button class="btn-cancel" onclick="closeModal('new-client-modal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ============================================================
+    // AUTH — solo resellers y admins pueden entrar aquí
+    // ============================================================
+    const AUTH_TOKEN   = localStorage.getItem('ads_engine_token');
+    const CURRENT_USER = JSON.parse(localStorage.getItem('ads_engine_user') || '{}');
+
+    if (!AUTH_TOKEN) { window.location.href = 'login.html'; }
+    if (CURRENT_USER.role === 'customer') { window.location.href = 'dashboard.html'; }
+
+    const SERVER_URL = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000' : '';
+
+    const PLAN_LABELS = {
+      starter: { label:'Starter', class:'starter' },
+      pro:     { label:'Pro',     class:'pro'     },
+      agency:  { label:'Agency',  class:'agency'  },
+    };
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('nav-email').textContent = CURRENT_USER.email || '';
+      document.getElementById('reseller-sub').textContent =
+        `Bienvenido, ${CURRENT_USER.email} · Gestiona tus clientes y créditos`;
+      loadClients();
+    });
+
+    // ============================================================
+    // LOAD CLIENTS
+    // ============================================================
+    async function loadClients() {
+      try {
+        const res = await fetch(`${SERVER_URL}/api/admin/reseller/clients`, {
+          headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
+        });
+
+        if (res.status === 401) { logout(); return; }
+        if (!res.ok) throw new Error('Error al cargar clientes');
+
+        const data = await res.json();
+        renderStats(data);
+        renderClients(data.clients || []);
+
+      } catch (err) {
+        document.getElementById('clients-body').innerHTML = `
+          <div class="empty-state">
+            <div class="icon">⚠️</div>
+            <p>Error al conectar con el servidor.</p>
+          </div>`;
+      }
+    }
+
+    // ============================================================
+    // RENDER STATS
+    // ============================================================
+    function renderStats(data) {
+      document.getElementById('stat-clients').textContent       = data.total_clients  || 0;
+      document.getElementById('stat-campaigns').textContent     = data.total_campaigns || 0;
+      document.getElementById('stat-credits-sold').textContent  = data.total_credits_sold || 0;
+    }
+
+    // ============================================================
+    // RENDER CLIENTS TABLE
+    // ============================================================
+    function renderClients(clients) {
+      const body = document.getElementById('clients-body');
+
+      if (!clients.length) {
+        body.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">👤</div>
+            <p>Aún no tienes clientes.<br>Pulsa "+ Nuevo cliente" para empezar.</p>
+          </div>`;
+        return;
+      }
+
+      body.innerHTML = '';
+      clients.forEach(c => {
+        const plan   = PLAN_LABELS[(c.plan_type||'starter').toLowerCase()] || PLAN_LABELS.starter;
+        const credits = c.credits_remaining ?? 0;
+        const dotClass = credits === 0 ? 'empty' : credits <= 3 ? 'low' : 'ok';
+        const date = new Date(c.created_at).toLocaleDateString('es-ES', {
+          day:'2-digit', month:'2-digit', year:'numeric'
+        });
+        const initials = (c.email||'?')[0].toUpperCase();
+
+        const row = document.createElement('div');
+        row.className = 'table-row';
+        row.innerHTML = `
+          <div class="client-email">
+            <span class="avatar">${initials}</span>${c.email}
+          </div>
+          <div>
+            <span class="plan-badge ${plan.class}">${plan.label}</span>
+          </div>
+          <div class="credits-cell">
+            <span class="credits-dot ${dotClass}"></span>
+            <strong>${credits}</strong>
+          </div>
+          <div class="date-cell">${date}</div>
+          <div>
+            <button class="btn-add-credits" onclick="openCreditsModal(${c.id}, '${c.email}')">
+              + Créditos
+            </button>
+          </div>
+        `;
+        body.appendChild(row);
+      });
+    }
+
+    // ============================================================
+    // MODAL: AÑADIR CRÉDITOS
+    // ============================================================
+    function openCreditsModal(userId, email) {
+      document.getElementById('credits-user-id').value = userId;
+      document.getElementById('credits-modal-sub').textContent = `Cliente: ${email}`;
+      document.getElementById('credits-amount').value = 10;
+      document.getElementById('credits-modal').classList.add('open');
+    }
+
+    async function confirmAddCredits() {
+      const userId  = document.getElementById('credits-user-id').value;
+      const amount  = parseInt(document.getElementById('credits-amount').value);
+
+      if (!amount || amount < 1) { showToast('⚠️ Introduce un número válido'); return; }
+
+      try {
+        const res = await fetch(`${SERVER_URL}/api/admin/credits/add`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${AUTH_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ user_id: userId, credits: amount })
+        });
+
+        if (res.ok) {
+          closeModal('credits-modal');
+          showToast(`✅ ${amount} créditos añadidos correctamente`);
+          loadClients(); // refrescar tabla
+        } else {
+          showToast('❌ Error al añadir créditos');
+        }
+      } catch(e) {
+        showToast('❌ Error de conexión');
+      }
+    }
+
+    // ============================================================
+    // MODAL: NUEVO CLIENTE
+    // ============================================================
+    function openNewClientModal() {
+      document.getElementById('new-client-email').value    = '';
+      document.getElementById('new-client-password').value = '';
+      document.getElementById('new-client-plan').value     = 'starter';
+      document.getElementById('new-client-modal').classList.add('open');
+    }
+
+    async function confirmNewClient() {
+      const email    = document.getElementById('new-client-email').value.trim();
+      const password = document.getElementById('new-client-password').value;
+      const plan     = document.getElementById('new-client-plan').value;
+
+      if (!email || !password) { showToast('⚠️ Completa email y contraseña'); return; }
+      if (password.length < 8)  { showToast('⚠️ La contraseña debe tener mínimo 8 caracteres'); return; }
+
+      try {
+        const res = await fetch(`${SERVER_URL}/api/admin/users/create`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${AUTH_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password, plan_type: plan, role: 'customer' })
+        });
+
+        if (res.ok) {
+          closeModal('new-client-modal');
+          showToast(`✅ Cliente ${email} creado correctamente`);
+          loadClients();
+        } else {
+          const data = await res.json();
+          showToast('❌ ' + (data.error || 'Error al crear cliente'));
+        }
+      } catch(e) {
+        showToast('❌ Error de conexión');
+      }
+    }
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function logout() {
+      localStorage.removeItem('ads_engine_token');
+      localStorage.removeItem('ads_engine_user');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>
