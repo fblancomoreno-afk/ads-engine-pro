@@ -35,20 +35,6 @@ app.use(express.static(path.join(__dirname, 'frontend')));
 // ============================================================
 app.use('/api/auth',      require('./routes/auth'));
 app.use('/api/campaigns', require('./routes/campaigns'));
-app.use('/api/campaigns', require('./routes/generar'));
+app.use('/api/campaigns', require('./rutas/generar'));
 app.use('/api/credits',   require('./routes/credits'));
-app.use('/api/admin',     require('./routes/admin'));
-app.use('/api/reseller',  require('./routes/reseller'));
-app.use('/api/webhooks',  require('./routes/webhooks'));
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', version: 'V8.3' });
-});
-// ============================================================
-// ARRANQUE
-// ============================================================
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`✅ Ads Engine Pro V8 - Servidor en puerto ${PORT}`);
-});
-module.exports = app;
+app.use('/api/admin',     require('./
