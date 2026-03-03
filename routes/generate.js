@@ -37,8 +37,33 @@ router.post('/generate', authenticateToken, async (req, res) => {
     return res.status(400).json({ error: 'Falta el prompt para generar la campaña.' });
   }
 
+  // Usamos un único pool para todo el flujo (descontar -> IA -> guardar)
+  const pool = getPool();
+  let discountApplied = false;
+
   try {
-    // Llamada a la API de Anthropic
+    // ------------------------------------------------------------
+    // 1) BLOQUEO + DESCUENTO ATÓMICO (1 campaña = 1 crédito)
+    // ------------------------------------------------------------
+    const dec = await pool.query(
+      `UPDATE users
+       SET credits_remaining = credits_remaining - 1
+       WHERE id = $1 AND credits_remaining > 0
+       RETURNING credits_remaining`,
+      [userId]
+    );
+
+    if (dec.rowCount === 0) {
+      return res.status(402).json({
+        error: 'No tienes campañas disponibles. Compra un paquete para seguir.'
+      });
+    }
+
+    discountApplied = true;
+
+    // ------------------------------------------------------------
+    // 2) Llamada a la API de Anthropic (solo si hay campañas)
+    // ------------------------------------------------------------
     const anthropic = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY
     });
@@ -54,10 +79,11 @@ router.post('/generate', authenticateToken, async (req, res) => {
       ]
     });
 
-    const campaignText = message.content[0].text;
+    const campaignText = message.content?.[0]?.text || '';
 
-    // Guardar en base de datos
-    const pool = getPool();
+    // ------------------------------------------------------------
+    // 3) Guardar en base de datos (no crítico)
+    // ------------------------------------------------------------
     try {
       await pool.query(
         `INSERT INTO campaigns (user_id, status, campaign_data, created_at)
@@ -66,17 +92,32 @@ router.post('/generate', authenticateToken, async (req, res) => {
       );
     } catch (dbErr) {
       console.error('Error guardando campaña en DB (no crítico):', dbErr.message);
-    } finally {
-      await pool.end();
     }
 
     return res.json({ campaignText });
 
   } catch (err) {
-    console.error('Error llamando a Anthropic:', err);
+    console.error('Error en generación (Anthropic o sistema):', err);
+
+    // Si falló Anthropic (o algo) y ya descontamos, devolvemos la campaña
+    if (discountApplied) {
+      try {
+        await pool.query(
+          `UPDATE users
+           SET credits_remaining = credits_remaining + 1
+           WHERE id = $1`,
+          [userId]
+        );
+      } catch (e) {
+        console.error('No se pudo revertir el crédito:', e.message);
+      }
+    }
+
     return res.status(500).json({
       error: 'Error al generar la campaña con IA. Inténtalo de nuevo.'
     });
+  } finally {
+    await pool.end();
   }
 });
 
