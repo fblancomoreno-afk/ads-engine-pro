@@ -45,6 +45,8 @@ app.use('/api/generate', require('./routes/generate'));
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', version: 'V8.3' });
+});app.get('/', (req, res) => {
+  res.status(200).send('OK');
 });
 
 // ============================================================
