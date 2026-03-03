@@ -43,7 +43,11 @@ app.get('/api/health', (req, res) => {
 });
 
 // ============================================================
-// ARRANQUE
+// const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`✅ Ads Engine Pro V8 - Servidor en puerto ${PORT}`);
+});
 // ============================================================
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
