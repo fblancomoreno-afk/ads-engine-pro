@@ -40,7 +40,7 @@ app.use('/api/credits', require('./routes/credits'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/reseller', require('./routes/reseller'));
 app.use('/api/webhooks', require('./routes/webhooks'));
-app.use('/api/generate', require('./routes/generate')); // ← LÍNEA AÑADIDA
+app.use('/api/generate', require('./routes/generate'));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -48,7 +48,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // ============================================================
-// ARRANQUE (SOLO UNA VEZ)
+// ARRANQUE (PORT SIEMPRE ANTES DEL LISTEN)
 // ============================================================
 const PORT = process.env.PORT || 3001;
 
