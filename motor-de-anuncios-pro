@@ -1,0 +1,24 @@
+# Ads Engine Pro V8
+
+## Quién soy
+Francisco Blanco — consultor Google Ads independiente, Barcelona.
+franciscoblanco.net
+
+## Qué es este proyecto
+Generador de campañas Google Ads desplegado en Railway.
+Máximo 7 URLs, 5 grupos de anuncios, foco anti-canibalización.
+258 palabras clave negativas profesionales.
+Export compatible con Google Ads Editor (Excel).
+Integración Jina AI para scraping de URLs.
+
+## Stack
+- Railway (producción)
+- GitHub (fblancomoreno-afk/motor-de-anuncios-pro)
+- Modelo: claude-sonnet-4-20250514
+- Dominio: franciscoblanco.net/v8-franciscoblanco-net/
+
+## Reglas
+- Nunca tocar producción sin confirmar primero
+- Usar /plan antes de cualquier cambio
+- Si hay duda, preguntar antes de ejecutar
+- Yo no soy programador — explicar qué hace cada cambio en lenguaje simple
