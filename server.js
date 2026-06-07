@@ -11,9 +11,6 @@ const app = express();
 
 app.set('trust proxy', 1);
 
-// ============================================================
-// MIDDLEWARES GLOBALES
-// ============================================================
 app.use(express.json({ limit: '10mb' }));
 app.use(
   cors({
@@ -30,14 +27,8 @@ const globalLimiter = rateLimit({
 });
 app.use(globalLimiter);
 
-// ============================================================
-// FRONTEND ESTÁTICO
-// ============================================================
-app.use(express.static(path.join(__dirname, 'Interfaz')));
+app.use(express.static(path.join(__dirname, 'frontend')));
 
-// ============================================================
-// RUTAS API
-// ============================================================
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/campaigns', require('./routes/campaigns'));
 app.use('/api/credits', require('./routes/credits'));
@@ -51,12 +42,9 @@ app.get('/api/health', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'Interfaz', 'login.html'));
+  res.sendFile(path.join(__dirname, 'frontend', 'login.html'));
 });
 
-// ============================================================
-// ARRANQUE
-// ============================================================
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`✅ Ads Engine Pro V8 - Servidor en puerto ${PORT}`);
