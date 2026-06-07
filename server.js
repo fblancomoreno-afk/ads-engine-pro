@@ -35,7 +35,7 @@ app.use('/api/credits', require('./routes/credits'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/reseller', require('./routes/reseller'));
 app.use('/api/webhooks', require('./routes/webhooks'));
-app.use('/api/generate', require('./routes/generate'));
+app.use('/api/campaigns', require('./routes/generate'));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', version: 'V8.3' });
