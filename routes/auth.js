@@ -30,14 +30,13 @@ router.post('/login', loginLimiter, async (req, res) => {
   const pool = getPool();
   try {
     const result = await pool.query(
-      'SELECT id, email, name, role, password_hash, is_active FROM users WHERE email = $1',
+      'SELECT id, email, role, plan_type, password_hash FROM users WHERE email = $1',
       [email.toLowerCase().trim()]
     );
 
     if (!result.rows.length) return res.status(401).json({ error: 'Email o contraseña incorrectos' });
 
     const user = result.rows[0];
-    if (user.is_active === false) return res.status(401).json({ error: 'Cuenta inactiva. Contacta con soporte.' });
 
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) return res.status(401).json({ error: 'Email o contraseña incorrectos' });
@@ -56,7 +55,7 @@ router.post('/login', loginLimiter, async (req, res) => {
       credits = { credits_remaining: cr.rows[0]?.credits_remaining || 0 };
     }
 
-    res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role, credits } });
+    res.json({ token, user: { id: user.id, email: user.email, role: user.role, plan_type: user.plan_type, credits } });
 
   } catch (err) {
     console.error('Login error:', err);
@@ -74,8 +73,8 @@ router.post('/register', authenticateToken, async (req, res) => {
     return res.status(403).json({ error: 'No tienes permisos para crear usuarios' });
   }
 
-  const { email, password, name, role = 'customer' } = req.body;
-  if (!email || !password || !name) return res.status(400).json({ error: 'Email, contraseña y nombre requeridos' });
+  const { email, password, role = 'customer' } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'Email y contraseña requeridos' });
   if (req.user.role === 'reseller' && role !== 'customer') return res.status(403).json({ error: 'Solo puedes crear clientes' });
 
   const pool = getPool();
@@ -85,9 +84,9 @@ router.post('/register', authenticateToken, async (req, res) => {
 
     const password_hash = await bcrypt.hash(password, 12);
     const newUser = await pool.query(
-      `INSERT INTO users (email, password_hash, name, role, reseller_id, credits_remaining)
-       VALUES ($1, $2, $3, $4, $5, 0) RETURNING id, email, name, role`,
-      [email.toLowerCase().trim(), password_hash, name, role,
+      `INSERT INTO users (email, password_hash, role, reseller_id, credits_remaining)
+       VALUES ($1, $2, $3, $4, 0) RETURNING id, email, role`,
+      [email.toLowerCase().trim(), password_hash, role,
        req.user.role === 'reseller' ? req.user.id : null]
     );
 
@@ -108,7 +107,7 @@ router.get('/me', authenticateToken, async (req, res) => {
   const pool = getPool();
   try {
     const result = await pool.query(
-      'SELECT id, email, name, role, credits_remaining FROM users WHERE id = $1', [req.user.id]
+      'SELECT id, email, role, plan_type, credits_remaining FROM users WHERE id = $1', [req.user.id]
     );
     res.json({ user: result.rows[0] });
   } catch (err) {
