@@ -3,18 +3,18 @@
 // Francisco Blanco | franciscoblanco.es
 // ============================================================
 require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-
+const path = require('path');
 const app = express();
+
+app.set('trust proxy', 1);
 
 // ============================================================
 // MIDDLEWARES GLOBALES
 // ============================================================
 app.use(express.json({ limit: '10mb' }));
-
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || '*',
@@ -23,7 +23,6 @@ app.use(
   })
 );
 
-// Rate limiting global - máximo 100 requests por 15 min por IP
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -32,7 +31,12 @@ const globalLimiter = rateLimit({
 app.use(globalLimiter);
 
 // ============================================================
-// RUTAS
+// FRONTEND ESTÁTICO
+// ============================================================
+app.use(express.static(path.join(__dirname, 'Interfaz')));
+
+// ============================================================
+// RUTAS API
 // ============================================================
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/campaigns', require('./routes/campaigns'));
@@ -42,18 +46,18 @@ app.use('/api/reseller', require('./routes/reseller'));
 app.use('/api/webhooks', require('./routes/webhooks'));
 app.use('/api/generate', require('./routes/generate'));
 
-// Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', version: 'V8.3' });
-});app.get('/', (req, res) => {
-  res.status(200).send('OK');
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Interfaz', 'login.html'));
 });
 
 // ============================================================
-// ARRANQUE (PORT SIEMPRE ANTES DEL LISTEN)
+// ARRANQUE
 // ============================================================
 const PORT = process.env.PORT || 3001;
-
 app.listen(PORT, () => {
   console.log(`✅ Ads Engine Pro V8 - Servidor en puerto ${PORT}`);
 });
