@@ -3458,6 +3458,14 @@ GENERA LA CAMPAÑA AHORA:`;
           }
 
         });
+
+        // ── KEYWORDS: strip brackets/quotes the model may have included ──
+        if (ag.keywords) {
+          ag.keywords.forEach(kw => {
+            kw.keyword = (kw.keyword || '').replace(/^[\[\]"]+|[\[\]"]+$/g, '').trim();
+          });
+        }
+
       });
 
       // ── Callouts: límite 25c ──────────────────────────────────────
