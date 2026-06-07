@@ -1206,6 +1206,28 @@
   </div>
   
   <script>
+    // ============================================================
+    // SESSION GUARD — validate JWT on every load
+    // ============================================================
+    (async function validateSession() {
+      const token = localStorage.getItem('ads_engine_token');
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+      const _serverUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
+      try {
+        const res = await fetch(`${_serverUrl}/api/auth/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('invalid');
+      } catch {
+        localStorage.removeItem('ads_engine_token');
+        localStorage.removeItem('ads_engine_user');
+        window.location.href = 'login.html';
+      }
+    })();
+
     let currentStep = 1;
     let formData = {};
     let generatedCampaign = null;

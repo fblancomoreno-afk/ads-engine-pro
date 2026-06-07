@@ -545,6 +545,20 @@
       ? 'http://localhost:3000'
       : '';
 
+    // Validate token against server on every load
+    (async function validateSession() {
+      try {
+        const res = await fetch(`${SERVER_URL}/api/auth/me`, {
+          headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
+        });
+        if (!res.ok) throw new Error('invalid');
+      } catch {
+        localStorage.removeItem('ads_engine_token');
+        localStorage.removeItem('ads_engine_user');
+        window.location.href = 'login.html';
+      }
+    })();
+
     // ============================================================
     // INIT
     // ============================================================
