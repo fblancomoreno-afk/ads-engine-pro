@@ -381,6 +381,7 @@
 
         // Guardar token y datos de usuario
         localStorage.setItem('ads_engine_token', data.token);
+        document.cookie = `ads_engine_token=${data.token}; path=/; SameSite=Strict`;
         localStorage.setItem('ads_engine_user', JSON.stringify({
           id:    data.user.id,
           email: data.user.email,

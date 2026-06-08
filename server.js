@@ -7,6 +7,8 @@ const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 const app = express();
 
 app.set('trust proxy', 1);
@@ -26,6 +28,24 @@ const globalLimiter = rateLimit({
   message: { error: 'Demasiadas peticiones. Espera 15 minutos.' },
 });
 app.use(globalLimiter);
+app.use(cookieParser());
+
+// ── Cookie-based route guard (does not touch API routes or authenticateToken) ──
+function requireCookieAuth(req, res, next) {
+  const token = req.cookies && req.cookies.ads_engine_token;
+  if (!token) return res.redirect('/login');
+  try {
+    jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    return res.redirect('/login');
+  }
+}
+
+app.get('/index.html',     requireCookieAuth, (req, res) =>
+  res.sendFile(path.join(__dirname, 'frontend', 'index.html')));
+app.get('/dashboard.html', requireCookieAuth, (req, res) =>
+  res.sendFile(path.join(__dirname, 'frontend', 'dashboard.html')));
 
 app.use(express.static(path.join(__dirname, 'frontend')));
 
