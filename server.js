@@ -42,6 +42,10 @@ app.get('/api/health', (req, res) => {
 });
 
 app.get('/', (req, res) => {
+  res.redirect(301, '/login');
+});
+
+app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'login.html'));
 });
 
