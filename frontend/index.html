@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <style>body{display:none}</style>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ads Engine Pro V8 TOP - Francisco Blanco | Google Ads Campaign Generator</title>
@@ -1221,6 +1222,7 @@
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('invalid');
+        document.body.style.display = 'block';
       } catch {
         localStorage.removeItem('ads_engine_token');
         localStorage.removeItem('ads_engine_user');
