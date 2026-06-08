@@ -42,10 +42,10 @@ function requireCookieAuth(req, res, next) {
   }
 }
 
-app.get('/index.html',     requireCookieAuth, (req, res) =>
-  res.sendFile(path.join(__dirname, 'frontend', 'index.html')));
-app.get('/dashboard.html', requireCookieAuth, (req, res) =>
-  res.sendFile(path.join(__dirname, 'frontend', 'dashboard.html')));
+app.get('/índice.html',    requireCookieAuth, (req, res) =>
+  res.sendFile(path.join(__dirname, 'frontend', 'índice.html')));
+app.get('/panel.html',     requireCookieAuth, (req, res) =>
+  res.sendFile(path.join(__dirname, 'frontend', 'panel.html')));
 
 app.use(express.static(path.join(__dirname, 'frontend')));
 
