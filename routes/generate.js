@@ -70,7 +70,7 @@ router.post('/generate', authenticateToken, async (req, res) => {
 
     const message = await anthropic.messages.create({
       model: 'claude-fable-5',
-      max_tokens: 8000,
+      max_tokens: 16000,
       messages: [
         {
           role: 'user',
