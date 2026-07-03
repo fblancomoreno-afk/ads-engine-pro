@@ -3334,6 +3334,23 @@ ESTRUCTURA JSON REQUERIDA (cada sitelink DEBE incluir desc2):
   }
 }
 
+🧠 SEÑALES PMAX + IA SEMÁNTICA (Google Gemini AI Mode 2025-2026):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Google usa búsquedas de Gemini AI como señales de intención para alimentar PMax.
+PARA ESTA CAMPAÑA AÑADIR AL FINAL DEL OUTPUT JSON:
+- Sección "pmax_signals" con segmentos de audiencia basados en intención IA del sector
+- Términos semánticos largos que Gemini AI respondería en este nicho
+- URLs de competidores como señal de audiencia
+- Recomendación de estructura PMax complementaria a la campaña Search generada
+
+Añade "pmax_signals" como clave raíz del JSON (al mismo nivel que "extensions"):
+"pmax_signals": {
+  "audienceSegments": ["..."],
+  "semanticTerms": ["..."],
+  "competitorUrls": ["..."],
+  "pmaxRecommendation": "..."
+}
+
 GENERA LA CAMPAÑA AHORA:`;
 
       return prompt;
