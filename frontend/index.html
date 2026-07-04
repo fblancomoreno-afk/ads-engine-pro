@@ -4281,7 +4281,7 @@ ${'─'.repeat(60)}
 
       // Strip [] and "" wrappers the AI adds to keywords
       function cleanKw(text) {
-        return String(text || '').replace(/^\[|\]$/g, '').replace(/^"|"$/g, '').trim();
+        return String(text || '').replace(/[\[\]"]/g, '').trim();
       }
 
       // Map AI match type values to Google Ads Editor expected values
