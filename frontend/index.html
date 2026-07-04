@@ -2327,6 +2327,12 @@ ${urlContent ? '- Usa las URLs REALES analizadas del sitio para máxima precisi�
 
 2. KEYWORDS (${formData.keywordsPerGroup} por grupo)
 
+   ⚠️ IMPORTANTE: Genera todas las keywords como texto limpio sin ningún símbolo.
+   NO uses corchetes [] en las keywords. NO uses comillas dobles "" en las keywords.
+   El tipo de concordancia va SOLO en el campo "matchType" del JSON.
+   Correcto: {"keyword": "consultor google ads", "matchType": "EXACT", "maxCPC": 3.00}
+   Incorrecto: {"keyword": "[consultor google ads]", "matchType": "EXACT", "maxCPC": 3.00}
+
    🎯 INTENCIÓN SEMÁNTICA — MICRO-MOMENTOS GOOGLE ADS 2024:
    ════════════════════════════════════════════════════════════════════
    Cada grupo debe cubrir los 4 micro-momentos de intención:
