@@ -1165,8 +1165,8 @@
           <button class="btn btn-primary" onclick="exportCompleteCSV()">
             <span class="btn-icon">📥</span> CSV Completo
           </button>
-          <button class="btn btn-secondary" onclick="exportKeywordsCSV()">
-            <span class="btn-icon">🔑</span> Solo Keywords
+          <button class="btn btn-secondary" onclick="exportGoogleAdsCSV()">
+            <span class="btn-icon">📊</span> CSV Google Ads Editor
           </button>
           <button class="btn btn-secondary" onclick="exportAdsCSV()">
             <span class="btn-icon">📝</span> Solo Anuncios
@@ -2573,12 +2573,19 @@ ${urlContent ? '- Usa las URLs REALES analizadas del sitio para máxima precisi�
    • Crea FOMO: "Plazas limitadas", "Oferta temporal", "Solo hoy"
    
    ESTRUCTURA POR ANUNCIO:
-   • 15 titulares distribuidos:
-     - 5 titulares con beneficios/resultados
-     - 3 titulares con marca/autoridad  
-     - 3 titulares con urgencia/acción
-     - 2 titulares con características únicas
-     - 2 titulares con localización/disponibilidad
+   • 15 titulares distribuidos en dos bloques:
+     — TITULARES 1-10 (CTAs + USPs):
+       · 4 titulares con beneficios/resultados
+       · 2 titulares con marca/autoridad
+       · 2 titulares con urgencia/acción
+       · 1 titular con características únicas
+       · 1 titular con localización/disponibilidad
+     — TITULARES 11-15 — BLOQUE AI-PROOF (Google AI Mode):
+       · 5 frases conversacionales que simulan respuestas directas a preguntas transaccionales que la IA de Google intercepta en el SERP
+       · Sin exclamaciones. Sin lenguaje publicitario. Naturales y específicas al negocio
+       · Adapta precio, ciudad, servicio y timeframe al negocio real del cliente
+       · Ejemplos del estilo: "Desde 900€/mes Sin Permanencia", "Consultor Ads BCN Desde 48h", "Resultados Reales Primer Mes"
+       · Máximo 30 caracteres cada uno (igual que el resto de titulares)
    
    • 4 descripciones:
      - Desc 1: Beneficio principal + CTA
@@ -4263,32 +4270,98 @@ ${'─'.repeat(60)}
       }
     }
     
-    // NEW: Export only Keywords as CSV
-    function exportKeywordsCSV() {
+    // Export unified Google Ads Editor CSV — single header, all entity types
+    function exportGoogleAdsCSV() {
       if (!generatedCampaign) {
         showToast('⚠️ Primero genera una campaña', 'warning');
         return;
       }
-      
-      let csv = 'Campaign,Ad Group,Keyword,Match Type,Max CPC\n';
-      
-      generatedCampaign.adGroups.forEach(ag => {
+
+      const campaign = generatedCampaign;
+
+      // Strip [] and "" wrappers the AI adds to keywords
+      function cleanKw(text) {
+        return String(text || '').replace(/^\[|\]$/g, '').replace(/^"|"$/g, '').trim();
+      }
+
+      // Map AI match type values to Google Ads Editor expected values
+      function normType(type) {
+        const map = { EXACT: 'Exact', PHRASE: 'Phrase', BROAD: 'Broad',
+                      Exact: 'Exact', Phrase: 'Phrase', Broad: 'Broad' };
+        return map[type] || type;
+      }
+
+      // Escape a single CSV cell (quote only when needed)
+      function esc(v) {
+        const s = String(v ?? '');
+        return (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r'))
+          ? '"' + s.replace(/"/g, '""') + '"'
+          : s;
+      }
+
+      // Universal header
+      const header = ['Campaign', 'Ad Group', 'Keyword', 'Criterion Type', 'Max CPC', 'Ad Type'];
+      for (let i = 1; i <= 15; i++) header.push('Headline ' + i);
+      for (let i = 1; i <= 4; i++) header.push('Description ' + i);
+      header.push('Path 1', 'Path 2', 'Final URL');
+
+      const COL = {};
+      header.forEach((h, i) => { COL[h] = i; });
+
+      const rows = [header.join(',')];
+
+      function makeRow() { return new Array(header.length).fill(''); }
+
+      // Keyword rows
+      campaign.adGroups.forEach(ag => {
         ag.keywords.forEach(kw => {
-          // Apply correct match type syntax
-          let formattedKeyword = kw.keyword;
-          if (kw.matchType === 'EXACT') {
-            formattedKeyword = `[${kw.keyword}]`;
-          } else if (kw.matchType === 'PHRASE') {
-            formattedKeyword = `"${kw.keyword}"`;
-          }
-          // BROAD stays without symbols
-          
-          csv += `"${generatedCampaign.name}","${ag.name}","${formattedKeyword}","${kw.matchType}",${kw.maxCPC || ag.bid}\n`;
+          const r = makeRow();
+          r[COL['Campaign']]       = campaign.name;
+          r[COL['Ad Group']]       = ag.name;
+          r[COL['Keyword']]        = cleanKw(kw.keyword);
+          r[COL['Criterion Type']] = normType(kw.matchType);
+          r[COL['Max CPC']]        = kw.maxCPC || ag.bid;
+          rows.push(r.map(esc).join(','));
         });
       });
-      
-      downloadFile(csv, `Keywords_${generatedCampaign.name.replace(/[^a-zA-Z0-9]/g, '_')}.csv`, 'text/csv');
-      showToast('✅ Keywords descargadas en CSV');
+
+      // RSA ad rows
+      campaign.adGroups.forEach(ag => {
+        (ag.ads || []).forEach(ad => {
+          const r = makeRow();
+          r[COL['Campaign']]  = campaign.name;
+          r[COL['Ad Group']]  = ag.name;
+          r[COL['Ad Type']]   = 'Responsive search ad';
+          for (let i = 0; i < 15; i++) r[COL['Headline ' + (i + 1)]]     = (ad.headlines    || [])[i] || '';
+          for (let i = 0; i < 4;  i++) r[COL['Description ' + (i + 1)]] = (ad.descriptions || [])[i] || '';
+          r[COL['Path 1']]    = ad.path1    || '';
+          r[COL['Path 2']]    = ad.path2    || '';
+          r[COL['Final URL']] = ad.finalUrl || '';
+          rows.push(r.map(esc).join(','));
+        });
+      });
+
+      // Negative keyword rows (campaign-level, Negative Exact)
+      (campaign.negatives || []).forEach(neg => {
+        const r = makeRow();
+        r[COL['Campaign']]       = campaign.name;
+        r[COL['Keyword']]        = cleanKw(neg);
+        r[COL['Criterion Type']] = 'Negative Exact';
+        rows.push(r.map(esc).join(','));
+      });
+
+      const csv = rows.join('\r\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `GoogleAdsEditor_${campaign.name.replace(/[^a-zA-Z0-9]/g, '_')}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('✅ CSV para Google Ads Editor descargado');
     }
     
     // NEW: Export only Ads as CSV
